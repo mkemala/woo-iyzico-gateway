@@ -51,7 +51,16 @@ Callback endpoint'i WordPress'in rewrite/permalink sistemine **bağımlı değil
 
 ### Yol haritası
 
-Bu plugin şu an sadece iyzico için yazıldı, bilinçli olarak genelleştirilmedi (erken soyutlama genelde yanlış soyutlamaya çıkar). İkinci bir provider eklenirken (PayTR, Craftgate vb.) ortaya çıkan ortak deseni bir `WC_Gateway_Hosted_Checkout_Base` soyut sınıfına çıkarmak gerçek bir sonraki adım olabilir.
+**Ücretsiz (bu repo, WordPress.org):** Sadece iyzico, mevcut özellik seti — hosted Checkout Form, sağlık kontrolü, domain/IP paneli. Bu her zaman ücretsiz ve açık kaynak kalacak.
+
+**Planlanan Pro sürüm (ayrı, ücretli):**
+- Çoklu provider desteği (PayTR, Craftgate, Param vb.) — `WC_Gateway_Hosted_Checkout_Base` soyutlaması üzerinden
+- Ürün bazlı satır kırılımlı basket (tek satır özet yerine)
+- Gerçek TCKN toplama alanı (checkout'a entegre, placeholder yerine)
+- Öncelikli destek
+- Fiyatlandırma fikri: $9.99/yıl ya da $29.90 lifetime (kesinleşmedi)
+
+Bilinçli olarak erken genelleştirmedik (erken soyutlama genelde yanlış soyutlamaya çıkar) — ücretsiz sürümde gerçek kullanıcı geri bildirimi toplandıktan sonra Pro'nun kapsamı netleşecek.
 
 ### Lisans
 
@@ -104,7 +113,16 @@ The callback endpoint intentionally does **not** rely on WordPress's rewrite/per
 
 ### Roadmap
 
-This plugin was intentionally written for iyzico only and not generalized prematurely (premature abstraction usually produces the wrong abstraction). Extracting a `WC_Gateway_Hosted_Checkout_Base` class once a second provider (PayTR, Craftgate, etc.) is added would be the natural next step.
+**Free (this repo, WordPress.org):** iyzico only, current feature set — hosted Checkout Form, health checks, domain/IP panel. This will always stay free and open source.
+
+**Planned Pro version (separate, paid):**
+- Multi-provider support (PayTR, Craftgate, Param, etc.) via a `WC_Gateway_Hosted_Checkout_Base` abstraction
+- Per-product basket line items (instead of a single order-summary line)
+- A real Turkish national ID (TCKN) collection field at checkout (instead of the derived placeholder)
+- Priority support
+- Rough pricing idea: $9.99/year or $29.90 lifetime (not finalized)
+
+We intentionally didn't generalize early (premature abstraction usually produces the wrong abstraction) — the Pro scope will firm up once the free version has real user feedback behind it.
 
 ### License
 
