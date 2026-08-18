@@ -1,0 +1,514 @@
+<?php
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+/**
+ * WC_Gateway_Iyzico_Custom
+ *
+ * iyzico "Checkout Form" (hosted payment page) entegrasyonu.
+ * Kart bilgisi hiçbir zaman bu sitenin sunucusundan geçmiyor —
+ * müşteri iyzico'nun kendi ödeme sayfasına yönlendiriliyor, orada
+ * 3D Secure dahil tüm akışı tamamlıyor, sonra callback URL'imize
+ * dönüyor. PCI-DSS yükü bu sayede minimum seviyede kalıyor.
+ *
+ * ÖNEMLİ (INCI Analyzer entegrasyonundan gelen ders):
+ * Sipariş eşleştirmesi iyzico'nun bize verdiği "token" üzerinden
+ * yapılır — conversationId üzerinden DEĞİL. conversationId sadece
+ * bizim tarafımızdan üretilen bir referans, güvenilir eşleştirme
+ * anahtarı değil.
+ *
+ * i18n NOTU: Tüm kullanıcıya görünen metinler __()/_e() ile sarılı,
+ * text domain 'woo-iyzico-custom'. Kaynak dil Türkçe (iyzico zaten
+ * sadece Türkiye'de kullanılan bir sağlayıcı, gerçek kullanıcı kitlesi
+ * %100 Türkçe) — ama bu sarım sayesinde ileride biri gerçekten başka
+ * bir dile çevirmek isterse kod değişikliği gerekmez, sadece .po/.mo
+ * dosyası eklemesi yeterli olur.
+ */
+class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
+
+    /** @var bool */
+    private $sandbox;
+
+    /** @var string */
+    private $api_key;
+
+    /** @var string */
+    private $secret_key;
+
+    /** @var bool */
+    private $debug;
+
+    /** @var WC_Logger|null */
+    private $logger;
+
+    public function __construct() {
+        $this->id                 = 'iyzico_custom';
+        $this->icon               = '';
+        $this->has_fields         = false; // hosted form - kendi kart formumuz yok
+        $this->method_title       = __('iyzico (Custom / 3D Secure)', 'woo-iyzico-custom');
+        $this->method_description = __('iyzico Checkout Form ile 3D Secure zorunlu ödeme. Kart verisi sitede tutulmaz.', 'woo-iyzico-custom');
+        $this->supports            = array('products');
+
+        $this->init_form_fields();
+        $this->init_settings();
+
+        $this->title       = $this->get_option('title');
+        $this->description = $this->get_option('description');
+        $this->enabled      = $this->get_option('enabled');
+        $this->sandbox      = 'yes' === $this->get_option('sandbox');
+        $this->debug        = 'yes' === $this->get_option('debug');
+
+        $this->api_key    = $this->sandbox ? $this->get_option('test_api_key') : $this->get_option('live_api_key');
+        $this->secret_key = $this->sandbox ? $this->get_option('test_secret_key') : $this->get_option('live_secret_key');
+
+        add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+
+        // Checkout sayfasında kart logoları + güven rozetleri için CSS.
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_checkout_assets'));
+
+        // NOT: /api/payment/callback isteği artık burada DEĞİL,
+        // woo-iyzico-custom.php içinde wic_maybe_handle_callback() ile,
+        // doğrudan REQUEST_URI kontrolüyle 'init' seviyesinde yakalanıyor.
+        // Bkz. oradaki yorum — bu class sadece checkout/ayarlar render'ında
+        // instantiate edildiği için buraya konan hook'lar admin-ajax.php
+        // ve hatta bazı doğrudan istek senaryolarında hiç tetiklenmeyebiliyor.
+    }
+
+    /**
+     * Checkout'ta ödeme yöntemi başlığının yanına iyzico'nun kendi resmi
+     * "logo band" görselini koyar (Visa/Mastercard/iyzico marka şeridi).
+     * Elle çizilmiş ikonlar yerine bunu kullanıyoruz — resmi ve tanıdık.
+     */
+    public function get_icon() {
+        $url  = WIC_PLUGIN_URL . 'assets/images/iyzico-logo-band.svg';
+        $icon = '<img src="' . esc_url($url) . '" alt="' . esc_attr__('iyzico', 'woo-iyzico-custom') . '" class="wic-logo-band" />';
+        return apply_filters('woocommerce_gateway_icon', $icon, $this->id);
+    }
+
+    /**
+     * Ödeme yöntemi seçildiğinde açılan kutunun içeriği — açıklama metni
+     * + güven rozetleri (SSL, 3D Secure, kart verisi saklanmaz).
+     * has_fields=false olduğu için burada kart formu YOK, sadece bilgi.
+     */
+    public function payment_fields() {
+        require_once WIC_PLUGIN_DIR . 'includes/icons.php';
+
+        if ($this->description) {
+            echo wp_kses_post(wpautop(wptexturize($this->description)));
+        }
+        ?>
+        <div class="wic-trust-badges">
+            <span class="wic-trust-badge"><?php echo wic_svg_lock(); ?> <?php esc_html_e('256-bit SSL ile şifrelenir', 'woo-iyzico-custom'); ?></span>
+            <span class="wic-trust-badge"><?php echo wic_svg_shield(); ?> <?php esc_html_e('3D Secure zorunlu doğrulama', 'woo-iyzico-custom'); ?></span>
+            <span class="wic-trust-badge"><?php echo wic_svg_no_card(); ?> <?php esc_html_e('Kart bilgisi sitede tutulmaz', 'woo-iyzico-custom'); ?></span>
+        </div>
+        <?php
+    }
+
+    public function enqueue_checkout_assets() {
+        if (!function_exists('is_checkout') || !is_checkout()) {
+            return;
+        }
+        wp_enqueue_style(
+            'wic-checkout',
+            WIC_PLUGIN_URL . 'assets/css/checkout.css',
+            array(),
+            WIC_VERSION
+        );
+    }
+
+    public function init_form_fields() {
+        $this->form_fields = array(
+            'enabled' => array(
+                'title'   => __('Etkinleştir', 'woo-iyzico-custom'),
+                'type'    => 'checkbox',
+                'label'   => __('iyzico ile ödemeyi etkinleştir', 'woo-iyzico-custom'),
+                'default' => 'no',
+            ),
+            'title' => array(
+                'title'       => __('Başlık', 'woo-iyzico-custom'),
+                'type'        => 'text',
+                'description' => __('Checkout sayfasında müşteriye görünen başlık. Logo zaten iyzico markasını gösterdiği için başlıkta ayrıca "iyzico" yazmana gerek yok.', 'woo-iyzico-custom'),
+                'default'     => __('Kredi/Banka Kartı', 'woo-iyzico-custom'),
+                'desc_tip'    => false,
+            ),
+            'description' => array(
+                'title'       => __('Açıklama', 'woo-iyzico-custom'),
+                'type'        => 'textarea',
+                'description' => __('Ödeme yöntemi seçildiğinde müşteriye görünen açıklama.', 'woo-iyzico-custom'),
+                'default'     => __('Kartınızla güvenli ödeme yapın. 3D Secure doğrulama sonrası siparişiniz onaylanır.', 'woo-iyzico-custom'),
+            ),
+            'sandbox' => array(
+                'title'       => __('Sandbox modu', 'woo-iyzico-custom'),
+                'type'        => 'checkbox',
+                'label'       => __('Test (sandbox) modunu etkinleştir', 'woo-iyzico-custom'),
+                'default'     => 'yes',
+                'description' => __('Canlıya almadan önce mutlaka sandbox key\'leriyle uçtan uca test et.', 'woo-iyzico-custom'),
+            ),
+            'test_api_key' => array(
+                'title' => __('Test API Key', 'woo-iyzico-custom'),
+                'type'  => 'text',
+            ),
+            'test_secret_key' => array(
+                'title' => __('Test Secret Key', 'woo-iyzico-custom'),
+                'type'  => 'password',
+            ),
+            'live_api_key' => array(
+                'title' => __('Live API Key', 'woo-iyzico-custom'),
+                'type'  => 'text',
+            ),
+            'live_secret_key' => array(
+                'title' => __('Live Secret Key', 'woo-iyzico-custom'),
+                'type'  => 'password',
+            ),
+            'debug' => array(
+                'title'       => __('Debug log', 'woo-iyzico-custom'),
+                'type'        => 'checkbox',
+                'label'       => __('İşlem loglarını WooCommerce > Status > Logs altına yaz', 'woo-iyzico-custom'),
+                'default'     => 'yes',
+            ),
+            'iyzico_panel_info' => array(
+                /* translators: section title shown above the callback URL / IP fields */
+                'title'       => __('iyzico Paneline Eklenecek Bilgiler', 'woo-iyzico-custom'),
+                'type'        => 'title',
+                'description' => __('Bu değerleri iyzico panelinde Ayarlar > IP/Back URL Yönetimi sayfasına ekleyip onaya göndermen gerekiyor. Aşağıdaki alanlar düzenlenebilir — otomatik tespit edilen değer yanlışsa (ör. yönlendirme yapan bir domain kullanıyorsan) elle düzeltebilirsin, plugin gerçekten burada yazan değeri kullanır.', 'woo-iyzico-custom'),
+            ),
+            'callback_url_override' => array(
+                'title'       => __('Callback URL', 'woo-iyzico-custom'),
+                'type'        => 'text',
+                /* translators: %s: computed default callback URL */
+                'description' => sprintf(__('iyzico panelinde Back URL olarak bunu kaydet. Boş bırakılırsa siteni home_url() adresinden otomatik hesaplanır (%s).', 'woo-iyzico-custom'), home_url('/api/payment/callback')),
+                'placeholder' => home_url('/api/payment/callback'),
+                'desc_tip'    => false,
+            ),
+            'server_ip' => array(
+                'title'       => __('Sunucu Çıkış IP Adresi', 'woo-iyzico-custom'),
+                'type'        => 'wic_ip_detect',
+                'description' => __('iyzico panelinde IP Adresleri listesine bunu ekle. "Tespit Et" butonu sunucunun iyzico\'ya giden isteklerde kullandığı gerçek çıkış IP\'sini bulur (ziyaretçi IP\'si değil).', 'woo-iyzico-custom'),
+            ),
+            'health_check_title' => array(
+                'title'       => __('Sağlık Kontrolü', 'woo-iyzico-custom'),
+                'type'        => 'title',
+                /* translators: %s: site admin email address */
+                'description' => sprintf(__('Callback endpoint erişilebilir mi, iyzico\'ya ağ bağlantısı var mı, API key/secret dolu mu — bugüne kadar elle yaptığımız kontrolleri otomatikleştiriyor. Günde bir kez arka planda da çalışır; bir sorun tespit edilir (veya düzelir) ise %s adresine otomatik e-posta gider.', 'woo-iyzico-custom'), esc_html(get_option('admin_email'))),
+            ),
+            'health_check' => array(
+                'title' => __('Durum', 'woo-iyzico-custom'),
+                'type'  => 'wic_health_check',
+            ),
+        );
+    }
+
+    /**
+     * "Sağlık Kontrolü" alanı — son kaydedilmiş sonucu sayfa yüklenirken
+     * gösterir (network isteği atmadan), buton tıklanınca AJAX ile
+     * anlık yeniden çalıştırır. Asıl mantık includes/health-check.php'de.
+     */
+    public function generate_wic_health_check_html($key, $data) {
+        require_once WIC_PLUGIN_DIR . 'includes/health-check.php';
+        $last = get_option('wic_last_health_check');
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc"><?php echo esc_html($data['title']); ?></th>
+            <td class="forminp">
+                <button type="button" class="button" id="wic-health-check-btn" data-nonce="<?php echo esc_attr(wp_create_nonce('wic_health_check')); ?>"><?php esc_html_e('Şimdi Kontrol Et', 'woo-iyzico-custom'); ?></button>
+                <span id="wic-health-check-status" style="margin-left:8px;"></span>
+                <div id="wic-health-check-results" style="margin-top:10px;">
+                    <?php echo wic_render_health_results_html($last); // phpcs:ignore -- kendi escape ettiğimiz HTML ?>
+                </div>
+            </td>
+        </tr>
+        <script>
+        (function() {
+            var btn = document.getElementById('wic-health-check-btn');
+            if (!btn || btn.dataset.wicBound) { return; }
+            btn.dataset.wicBound = '1';
+
+            var i18n = <?php echo wp_json_encode(array(
+                'checking'    => __('Kontrol ediliyor (birkaç saniye sürebilir)...', 'woo-iyzico-custom'),
+                'done'        => __('Tamamlandı.', 'woo-iyzico-custom'),
+                'failed'      => __('Kontrol başarısız oldu.', 'woo-iyzico-custom'),
+                'lastCheck'   => __('Son kontrol:', 'woo-iyzico-custom'),
+                'statusOk'    => __('OK', 'woo-iyzico-custom'),
+                'statusWarn'  => __('UYARI', 'woo-iyzico-custom'),
+                'statusError' => __('HATA', 'woo-iyzico-custom'),
+            )); ?>;
+
+            var statusColors = {ok: '#2e7d32', warning: '#b8860b', error: '#c62828'};
+            var statusLabels = {ok: i18n.statusOk, warning: i18n.statusWarn, error: i18n.statusError};
+
+            function renderChecks(checks, time) {
+                var html = '<p style="color:#666;margin:0 0 6px;">' + i18n.lastCheck + ' ' + time + '</p><ul style="margin:0;padding-left:18px;">';
+                Object.keys(checks).forEach(function(key) {
+                    var c = checks[key];
+                    var color = statusColors[c.status] || '#666';
+                    var label = statusLabels[c.status] || c.status.toUpperCase();
+                    html += '<li style="margin-bottom:4px;"><strong style="color:' + color + '">[' + label + ']</strong> ' + c.label + ' — ' + c.message + '</li>';
+                });
+                html += '</ul>';
+                return html;
+            }
+
+            btn.addEventListener('click', function() {
+                var status = document.getElementById('wic-health-check-status');
+                var results = document.getElementById('wic-health-check-results');
+                status.textContent = i18n.checking;
+                var body = new URLSearchParams();
+                body.append('action', 'wic_run_health_check');
+                body.append('nonce', btn.dataset.nonce);
+                fetch(ajaxurl, { method: 'POST', credentials: 'same-origin', body: body })
+                    .then(function(r) { return r.json(); })
+                    .then(function(json) {
+                        if (json.success) {
+                            status.textContent = i18n.done;
+                            results.innerHTML = renderChecks(json.data.checks, json.data.time);
+                        } else {
+                            status.textContent = i18n.failed;
+                        }
+                    })
+                    .catch(function() {
+                        status.textContent = i18n.failed;
+                    });
+            });
+        })();
+        </script>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * WooCommerce Settings API'nin standart alan tiplerinde "IP tespit et"
+     * butonu yok, o yüzden custom bir field type render ediyoruz.
+     * generate_{type}_html isimlendirmesi WC_Settings_API'nin kendi
+     * konvansiyonu — bu isimle üzerine yazınca otomatik çağrılıyor.
+     */
+    public function generate_wic_ip_detect_html($key, $data) {
+        $field_key = $this->get_field_key($key);
+        $value     = $this->get_option($key);
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc">
+                <label for="<?php echo esc_attr($field_key); ?>"><?php echo esc_html($data['title']); ?></label>
+            </th>
+            <td class="forminp">
+                <input type="text" class="regular-text" id="<?php echo esc_attr($field_key); ?>" name="<?php echo esc_attr($field_key); ?>" value="<?php echo esc_attr($value); ?>" />
+                <button type="button" class="button" id="wic-detect-ip-btn" data-target="<?php echo esc_attr($field_key); ?>" data-nonce="<?php echo esc_attr(wp_create_nonce('wic_detect_ip')); ?>"><?php esc_html_e('Tespit Et', 'woo-iyzico-custom'); ?></button>
+                <span id="wic-detect-ip-status" style="margin-left:8px;"></span>
+                <p class="description"><?php echo wp_kses_post($data['description']); ?></p>
+            </td>
+        </tr>
+        <script>
+        (function() {
+            var btn = document.getElementById('wic-detect-ip-btn');
+            if (!btn || btn.dataset.wicBound) { return; }
+            btn.dataset.wicBound = '1';
+
+            var i18n = <?php echo wp_json_encode(array(
+                'detecting'  => __('Tespit ediliyor...', 'woo-iyzico-custom'),
+                'found'      => __('Bulundu — kaydetmeyi unutma.', 'woo-iyzico-custom'),
+                'notFound'   => __('Tespit edilemedi, elle gir.', 'woo-iyzico-custom'),
+            )); ?>;
+
+            btn.addEventListener('click', function() {
+                var status = document.getElementById('wic-detect-ip-status');
+                var input = document.getElementById(btn.dataset.target);
+                status.textContent = i18n.detecting;
+                var body = new URLSearchParams();
+                body.append('action', 'wic_detect_ip');
+                body.append('nonce', btn.dataset.nonce);
+                fetch(ajaxurl, { method: 'POST', credentials: 'same-origin', body: body })
+                    .then(function(r) { return r.json(); })
+                    .then(function(json) {
+                        if (json.success && json.data && json.data.ip) {
+                            input.value = json.data.ip;
+                            status.textContent = i18n.found;
+                        } else {
+                            status.textContent = i18n.notFound;
+                        }
+                    })
+                    .catch(function() {
+                        status.textContent = i18n.notFound;
+                    });
+            });
+        })();
+        </script>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * NOT: Bu metod artık kullanılmıyor, admin-ajax.php üzerinden
+     * gelen istekler bu gateway class'ının instantiate edilmesini garanti
+     * etmiyor (sadece checkout/ayarlar render'ında oluşturuluyor). Gerçek
+     * handler woo-iyzico-custom.php içinde wic_ajax_detect_ip() olarak,
+     * plugins_loaded seviyesinde koşulsuz kayıt ediliyor. Bkz. oradaki yorum.
+     */
+
+    private function log($message, $level = 'info') {
+        if (!$this->debug) {
+            return;
+        }
+        if (null === $this->logger) {
+            $this->logger = wc_get_logger();
+        }
+        $this->logger->log($level, $message, array('source' => 'iyzico-custom'));
+    }
+
+    private function get_iyzico_options() {
+        $options = new \Iyzipay\Options();
+        $options->setApiKey($this->api_key);
+        $options->setSecretKey($this->secret_key);
+        $options->setBaseUrl($this->sandbox ? 'https://sandbox-api.iyzipay.com' : 'https://api.iyzipay.com');
+        return $options;
+    }
+
+    /**
+     * Ayarlar sayfasındaki "Callback URL" alanı doldurulmuşsa onu kullan
+     * (ör. home_url() gerçek domain'i yansıtmıyorsa manuel düzeltme imkanı),
+     * doldurulmamışsa home_url() üzerinden otomatik hesapla.
+     */
+    private function get_callback_url() {
+        $override = trim($this->get_option('callback_url_override'));
+        return $override ? $override : home_url('/api/payment/callback');
+    }
+
+    /**
+     * TCKN (kimlik no) alanı iyzico API'sinde zorunlu ama WooCommerce
+     * checkout'u varsayılan olarak bu bilgiyi toplamıyor. Gerçek bir
+     * TCKN alanı eklemek istersen (checkout'a custom field olarak)
+     * bunu ileride ekleyebiliriz — şimdilik telefon numarasından
+     * türetilmiş 11 haneli bir placeholder kullanıyoruz. Bu iyzico'nun
+     * format validasyonunu geçer ama gerçek kimlik doğrulaması değildir;
+     * yüksek hacimli / risk skorlaması hassas mağazalarda gerçek TCKN
+     * toplamak daha sağlıklı olur.
+     */
+    private function derive_identity_number($order) {
+        $digits = preg_replace('/\D/', '', $order->get_billing_phone());
+        $digits = str_pad($digits, 11, '1');
+        return substr($digits, 0, 11);
+    }
+
+    private function get_country_name($code) {
+        if (function_exists('WC') && WC()->countries) {
+            $countries = WC()->countries->get_countries();
+            if (isset($countries[$code])) {
+                return $countries[$code];
+            }
+        }
+        return $code ? $code : 'Turkey';
+    }
+
+    private function build_address($order, $type = 'billing') {
+        $address = new \Iyzipay\Model\Address();
+
+        if ('shipping' === $type && $order->has_shipping_address()) {
+            $address->setContactName(trim($order->get_shipping_first_name() . ' ' . $order->get_shipping_last_name()));
+            $address->setCity($order->get_shipping_city() ?: $order->get_billing_city());
+            $address->setCountry($this->get_country_name($order->get_shipping_country() ?: $order->get_billing_country()));
+            $address->setAddress(trim($order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2()) ?: trim($order->get_billing_address_1() . ' ' . $order->get_billing_address_2()));
+            $address->setZipCode($order->get_shipping_postcode() ?: $order->get_billing_postcode());
+            return $address;
+        }
+
+        $address->setContactName(trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()));
+        $address->setCity($order->get_billing_city());
+        $address->setCountry($this->get_country_name($order->get_billing_country()));
+        $address->setAddress(trim($order->get_billing_address_1() . ' ' . $order->get_billing_address_2()));
+        $address->setZipCode($order->get_billing_postcode());
+        return $address;
+    }
+
+    public function process_payment($order_id) {
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            wc_add_notice(__('Sipariş bulunamadı.', 'woo-iyzico-custom'), 'error');
+            return array('result' => 'failure');
+        }
+
+        if (empty($this->api_key) || empty($this->secret_key)) {
+            $this->log('API key/secret ayarlanmamış, ödeme başlatılamadı.', 'error');
+            wc_add_notice(__('Ödeme sistemi şu anda yapılandırılamamış durumda, lütfen bizimle iletişime geçin.', 'woo-iyzico-custom'), 'error');
+            return array('result' => 'failure');
+        }
+
+        $request = new \Iyzipay\Request\CreateCheckoutFormInitializeRequest();
+        $request->setLocale(\Iyzipay\Model\Locale::TR);
+        $request->setConversationId((string) $order->get_id() . '-' . uniqid());
+        $request->setPrice(number_format((float) $order->get_total(), 2, '.', ''));
+        $request->setPaidPrice(number_format((float) $order->get_total(), 2, '.', ''));
+        $request->setCurrency(\Iyzipay\Model\Currency::TL);
+        $request->setBasketId((string) $order->get_id());
+        $request->setPaymentGroup(\Iyzipay\Model\PaymentGroup::PRODUCT);
+        $request->setForceThreeDS(1); // sadece 3D Secure
+        $request->setCallbackUrl($this->get_callback_url());
+
+        $buyer = new \Iyzipay\Model\Buyer();
+        $buyer->setId('BY' . $order->get_id());
+        $buyer->setName($order->get_billing_first_name() ?: __('Musteri', 'woo-iyzico-custom'));
+        $buyer->setSurname($order->get_billing_last_name() ?: '-');
+        $buyer->setIdentityNumber($this->derive_identity_number($order));
+        $buyer->setEmail($order->get_billing_email());
+        $buyer->setGsmNumber($order->get_billing_phone());
+        $buyer->setRegistrationAddress($order->get_billing_address_1() ?: __('Adres belirtilmedi', 'woo-iyzico-custom'));
+        $buyer->setCity($order->get_billing_city() ?: 'Istanbul');
+        $buyer->setCountry($this->get_country_name($order->get_billing_country()));
+        $buyer->setZipCode($order->get_billing_postcode() ?: '00000');
+        $buyer->setIp($order->get_customer_ip_address() ?: '127.0.0.1');
+        $request->setBuyer($buyer);
+
+        $request->setBillingAddress($this->build_address($order, 'billing'));
+        $request->setShippingAddress($this->build_address($order, $order->has_shipping_address() ? 'shipping' : 'billing'));
+
+        // Basit ve sağlam yaklaşım: tek satırlık "sipariş özeti" basket item.
+        // iyzico, basketItems fiyat toplamının price alanına eşit olmasını
+        // istiyor; ürün bazlı satır kırılımı istenirse (vergi/kargo dahil
+        // toplamla tam eşleşecek şekilde) ileride genişletilebilir.
+        $basketItem = new \Iyzipay\Model\BasketItem();
+        $basketItem->setId('order-' . $order->get_id());
+        /* translators: %s: order number */
+        $basketItem->setName(sprintf(__('Siparis #%s', 'woo-iyzico-custom'), $order->get_order_number()));
+        $basketItem->setCategory1(__('Genel', 'woo-iyzico-custom'));
+        $basketItem->setItemType(\Iyzipay\Model\BasketItemType::PHYSICAL);
+        $basketItem->setPrice(number_format((float) $order->get_total(), 2, '.', ''));
+        $request->setBasketItems(array($basketItem));
+
+        try {
+            $checkoutFormInitialize = \Iyzipay\Model\CheckoutFormInitialize::create($request, $this->get_iyzico_options());
+        } catch (\Exception $e) {
+            $this->log('CheckoutFormInitialize exception: ' . $e->getMessage(), 'error');
+            wc_add_notice(__('Ödeme başlatılırken bir hata oluştu, lütfen tekrar deneyin.', 'woo-iyzico-custom'), 'error');
+            return array('result' => 'failure');
+        }
+
+        if ('success' !== $checkoutFormInitialize->getStatus()) {
+            $this->log('CheckoutFormInitialize failed: ' . $checkoutFormInitialize->getErrorMessage() . ' (order #' . $order->get_id() . ')', 'error');
+            /* translators: %s: iyzico error message */
+            wc_add_notice(sprintf(__('Ödeme başlatılamadı: %s', 'woo-iyzico-custom'), $checkoutFormInitialize->getErrorMessage()), 'error');
+            return array('result' => 'failure');
+        }
+
+        // Token'ı sipariş meta'sına yaz — callback'te eşleştirme bununla yapılacak.
+        $order->update_meta_data('_wic_iyzico_token', $checkoutFormInitialize->getToken());
+        /* translators: %s: iyzico checkout form token */
+        $order->add_order_note(sprintf(__('iyzico ödeme sayfasına yönlendirildi. Token: %s', 'woo-iyzico-custom'), $checkoutFormInitialize->getToken()));
+        $order->update_status('pending', __('iyzico ödemesi bekleniyor', 'woo-iyzico-custom'));
+        $order->save();
+
+        $this->log('CheckoutForm initialized for order #' . $order->get_id() . ', token: ' . $checkoutFormInitialize->getToken());
+
+        return array(
+            'result'   => 'success',
+            'redirect' => $checkoutFormInitialize->getPaymentPageUrl(),
+        );
+    }
+
+    // NOT: Callback işleme mantığı artık burada değil — bkz.
+    // includes/callback-handler.php > wic_process_iyzico_callback().
+    // Bu class instantiation'a bağımlı olduğu için taşındı (detaylı
+    // açıklama woo-iyzico-custom.php içindeki wic_maybe_handle_callback()
+    // yorumunda).
+}

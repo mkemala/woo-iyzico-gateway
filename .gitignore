@@ -1,0 +1,15 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Never commit real credentials, backups, or local test artifacts
+*.env
+*.log
+*.bak-*
+*.zip
+
+# Generated translation compiled files (keep the .pot source, not local .mo builds)
+languages/*.mo
