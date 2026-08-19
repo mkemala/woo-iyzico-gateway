@@ -203,6 +203,10 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
                 'type'        => 'wic_ip_detect',
                 'description' => __('iyzico panelinde IP Adresleri listesine bunu ekle. "Tespit Et" butonu sunucunun iyzico\'ya giden isteklerde kullandığı gerçek çıkış IP\'sini bulur (ziyaretçi IP\'si değil).', 'woo-iyzico-custom'),
             ),
+            'reference_links' => array(
+                'title' => __('Faydalı Linkler', 'woo-iyzico-custom'),
+                'type'  => 'wic_reference_links',
+            ),
             'branding_title' => array(
                 'title'       => __('Görünüm', 'woo-iyzico-custom'),
                 'type'        => 'title',
@@ -451,6 +455,45 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
     private function get_callback_url() {
         $override = trim($this->get_option('callback_url_override'));
         return $override ? $override : home_url('/api/payment/callback');
+    }
+
+    /**
+     * Sandbox/live moduna göre değişen kısa link listesi — bir önceki
+     * oturumda "sandbox key'lerini nereden bulacağım" diye epey vakit
+     * harcamıştık, o keşif sürecini burada bir kerelik yapıp linkleri
+     * ayarlar sayfasına gömdük.
+     *
+     * BİLİNÇLİ OLARAK render zamanında (generate_{type}_html) çağrılan
+     * bir custom field type — init_form_fields() içinde STATİK olarak
+     * çağrılsaydı $this->sandbox henüz set edilmemiş olurdu (constructor
+     * sıralaması: form_fields önce, sandbox/settings sonra atanıyor).
+     * Aynı deseni generate_wic_ip_detect_html / generate_wic_health_check_html
+     * için de kullanıyoruz.
+     */
+    public function generate_wic_reference_links_html($key, $data) {
+        $sandbox   = 'yes' === $this->get_option('sandbox');
+        $panel_url = $sandbox
+            ? 'https://sandbox-merchant.iyzipay.com'
+            : 'https://merchant.iyzipay.com';
+        $panel_label = $sandbox
+            ? __('Sandbox Panel', 'woo-iyzico-custom')
+            : __('Live Panel', 'woo-iyzico-custom');
+
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc"><?php echo esc_html($data['title']); ?></th>
+            <td class="forminp">
+                <a href="<?php echo esc_url($panel_url); ?>" target="_blank" rel="noopener"><?php echo esc_html($panel_label); ?></a>
+                &middot;
+                <a href="https://docs.iyzico.com" target="_blank" rel="noopener"><?php esc_html_e('Dokümantasyon', 'woo-iyzico-custom'); ?></a>
+                <p class="description">
+                    <?php esc_html_e('Test kartı numaraları dokümantasyon sitesindeki "Test Kartları" bölümünde — güncel liste zaman zaman değişebildiği için buraya sabit yazmadık.', 'woo-iyzico-custom'); ?>
+                </p>
+            </td>
+        </tr>
+        <?php
+        return ob_get_clean();
     }
 
     /**
