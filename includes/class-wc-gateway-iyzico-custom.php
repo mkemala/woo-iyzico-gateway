@@ -133,6 +133,9 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
 
     public function init_form_fields() {
         $this->form_fields = array(
+            'getting_started' => array(
+                'type' => 'wic_getting_started',
+            ),
             'enabled' => array(
                 'title'   => __('Etkinleştir', 'woo-iyzico-custom'),
                 'type'    => 'checkbox',
@@ -313,6 +316,42 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
             });
         })();
         </script>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Ayarlar sayfasının en üstünde tam genişlikte bir "Başlarken" özeti
+     * — README'yi hiç görmemiş biri bile ne yapması gerektiğini burada
+     * bulsun diye. Diğer alan tiplerinden farklı olarak label/input
+     * ikili sütun düzenini değil, tam genişlik (colspan) kullanıyor.
+     */
+    public function generate_wic_getting_started_html($key, $data) {
+        ob_start();
+        ?>
+        <tr valign="top">
+            <td colspan="2" style="padding:0 0 20px;">
+                <div style="background:#F5FAF6;border:1px solid #D7E7DC;border-radius:10px;padding:16px 20px;">
+                    <p style="margin-top:0;"><strong><?php esc_html_e('Başlarken', 'woo-iyzico-custom'); ?></strong></p>
+                    <ol style="margin:0 0 8px;padding-left:20px;">
+                        <li><?php esc_html_e('Sandbox modunda başla — Test API Key/Secret\'ı iyzico\'nun sandbox panelinden (sandbox-merchant.iyzipay.com) al, aşağıdaki ilgili alanlara gir.', 'woo-iyzico-custom'); ?></li>
+                        <li><?php esc_html_e('Aşağıdaki "Callback URL" ve "Sunucu Çıkış IP Adresi" değerlerini iyzico panelinde Ayarlar > IP/Back URL Yönetimi\'ne ekleyip onaya gönder.', 'woo-iyzico-custom'); ?></li>
+                        <li><?php esc_html_e('iyzico\'nun sandbox test kartlarından biriyle bir sipariş tamamla.', 'woo-iyzico-custom'); ?></li>
+                        <li><?php esc_html_e('En alttaki Sağlık Kontrolü bölümünden "Şimdi Kontrol Et"e bas — hepsi yeşil olmalı.', 'woo-iyzico-custom'); ?></li>
+                        <li><?php esc_html_e('Onay tamamlanınca: Sandbox modunu kapat, Live key\'leri gir, küçük tutarlı bir gerçek işlemle son kez test et.', 'woo-iyzico-custom'); ?></li>
+                    </ol>
+                    <p style="margin:0;font-size:12.5px;color:#5A7666;">
+                        <?php
+                        printf(
+                            /* translators: %s: link to the plugin's GitHub README */
+                            esc_html__('Daha fazla ayrıntı için: %s', 'woo-iyzico-custom'),
+                            '<a href="https://github.com/mkemala/woo-iyzico-gateway" target="_blank" rel="noopener">README</a>'
+                        );
+                        ?>
+                    </p>
+                </div>
+            </td>
+        </tr>
         <?php
         return ob_get_clean();
     }
