@@ -117,6 +117,18 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
             array(),
             WIC_VERSION
         );
+
+        // Kullanıcının ayarlar sayfasında seçtiği renkleri CSS custom
+        // property olarak enjekte ediyoruz. Hiçbir şey değiştirmediyse
+        // checkout.css'teki fallback değerler (mevcut yeşil palet) geçerli
+        // kalır — bu yüzden var(--wic-primary, #2F453A) şeklinde yazıldı.
+        $custom_css = sprintf(
+            ':root{--wic-primary:%s;--wic-bg:%s;--wic-border:%s;}',
+            sanitize_hex_color($this->get_option('color_primary', '#2F453A')) ?: '#2F453A',
+            sanitize_hex_color($this->get_option('color_bg', '#F5FAF6')) ?: '#F5FAF6',
+            sanitize_hex_color($this->get_option('color_border', '#D7E7DC')) ?: '#D7E7DC'
+        );
+        wp_add_inline_style('wic-checkout', $custom_css);
     }
 
     public function init_form_fields() {
@@ -187,6 +199,32 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
                 'title'       => __('Sunucu Çıkış IP Adresi', 'woo-iyzico-custom'),
                 'type'        => 'wic_ip_detect',
                 'description' => __('iyzico panelinde IP Adresleri listesine bunu ekle. "Tespit Et" butonu sunucunun iyzico\'ya giden isteklerde kullandığı gerçek çıkış IP\'sini bulur (ziyaretçi IP\'si değil).', 'woo-iyzico-custom'),
+            ),
+            'branding_title' => array(
+                'title'       => __('Görünüm', 'woo-iyzico-custom'),
+                'type'        => 'title',
+                'description' => __('Checkout\'ta ödeme kutusunun rengini kendi marka renklerine uyarlayabilirsin. Hiçbir şey değiştirmezsen mevcut yeşil palet kalır.', 'woo-iyzico-custom'),
+            ),
+            'color_primary' => array(
+                'title'       => __('Ana Renk', 'woo-iyzico-custom'),
+                'type'        => 'color',
+                'default'     => '#2F453A',
+                'description' => __('Güven rozeti ikonları ve metinleri bu rengi kullanır.', 'woo-iyzico-custom'),
+                'desc_tip'    => true,
+            ),
+            'color_bg' => array(
+                'title'       => __('Kutu Arka Plan Rengi', 'woo-iyzico-custom'),
+                'type'        => 'color',
+                'default'     => '#F5FAF6',
+                'description' => __('Ödeme yöntemi seçildiğinde açılan kutunun arka planı.', 'woo-iyzico-custom'),
+                'desc_tip'    => true,
+            ),
+            'color_border' => array(
+                'title'       => __('Kenarlık Rengi', 'woo-iyzico-custom'),
+                'type'        => 'color',
+                'default'     => '#D7E7DC',
+                'description' => __('Kutunun ince kenarlığı.', 'woo-iyzico-custom'),
+                'desc_tip'    => true,
             ),
             'health_check_title' => array(
                 'title'       => __('Sağlık Kontrolü', 'woo-iyzico-custom'),

@@ -4,11 +4,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce iyzico Odeme Ag Gecidi (Custom) 1.2.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-18 06:04+0000\n"
+"POT-Creation-Date: 2026-08-19 10:30+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2026-08-18 06:04+0000\n"
+"PO-Revision-Date: 2026-08-19 10:30+0000\n"
 "Language-Team: \n"
 "X-Domain: woo-iyzico-custom\n"
 
@@ -30,15 +30,19 @@ msgstr ""
 msgid "3D Secure zorunlu doğrulama"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:456
+#: includes/class-wc-gateway-iyzico-custom.php:494
 msgid "Adres belirtilmedi"
+msgstr ""
+
+#: includes/class-wc-gateway-iyzico-custom.php:209
+msgid "Ana Renk"
 msgstr ""
 
 #: includes/health-check.php:224
 msgid "Ayarlar sayfasından detayları gör"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:138
+#: includes/class-wc-gateway-iyzico-custom.php:150
 msgid "Açıklama"
 msgstr ""
 
@@ -47,7 +51,7 @@ msgstr ""
 msgid "Bağlantı kuruldu (HTTP %d)."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:131
+#: includes/class-wc-gateway-iyzico-custom.php:143
 msgid "Başlık"
 msgstr ""
 
@@ -56,16 +60,16 @@ msgstr ""
 msgid "Beklenmeyen yanıt: HTTP %d. Başka bir plugin bu path'i ele geçirmiş olabilir (rewrite/cache/güvenlik eklentisi kontrol et)."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:176
+#: includes/class-wc-gateway-iyzico-custom.php:188
 #. translators: section title shown above the callback URL / IP fields
 msgid "Bu değerleri iyzico panelinde Ayarlar > IP/Back URL Yönetimi sayfasına ekleyip onaya göndermen gerekiyor. Aşağıdaki alanlar düzenlenebilir — otomatik tespit edilen değer yanlışsa (ör. yönlendirme yapan bir domain kullanıyorsan) elle düzeltebilirsin, plugin gerçekten burada yazan değeri kullanır."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:312
+#: includes/class-wc-gateway-iyzico-custom.php:350
 msgid "Bulundu — kaydetmeyi unutma."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:179
+#: includes/class-wc-gateway-iyzico-custom.php:191
 msgid "Callback URL"
 msgstr ""
 
@@ -75,20 +79,24 @@ msgstr ""
 msgid "Callback endpoint erişilebilir"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:195
+#: includes/class-wc-gateway-iyzico-custom.php:233
 #. translators: %s: site admin email address
 msgid "Callback endpoint erişilebilir mi, iyzico'ya ağ bağlantısı var mı, API key/secret dolu mu — bugüne kadar elle yaptığımız kontrolleri otomatikleştiriyor. Günde bir kez arka planda da çalışır; bir sorun tespit edilir (veya düzelir) ise %s adresine otomatik e-posta gider."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:148
+#: includes/class-wc-gateway-iyzico-custom.php:160
 msgid "Canlıya almadan önce mutlaka sandbox key'leriyle uçtan uca test et."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:133
+#: includes/class-wc-gateway-iyzico-custom.php:145
 msgid "Checkout sayfasında müşteriye görünen başlık. Logo zaten iyzico markasını gösterdiği için başlıkta ayrıca \"iyzico\" yazmana gerek yok."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:167
+#: includes/class-wc-gateway-iyzico-custom.php:206
+msgid "Checkout'ta ödeme kutusunun rengini kendi marka renklerine uyarlayabilirsin. Hiçbir şey değiştirmezsen mevcut yeşil palet kalır."
+msgstr ""
+
+#: includes/class-wc-gateway-iyzico-custom.php:179
 msgid "Debug log"
 msgstr ""
 
@@ -105,7 +113,7 @@ msgstr ""
 msgid "Doğru şekilde yönlendirme yapıyor (HTTP %d)."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:198
+#: includes/class-wc-gateway-iyzico-custom.php:236
 msgid "Durum"
 msgstr ""
 
@@ -117,16 +125,24 @@ msgstr ""
 msgid "Etkin."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:125
+#: includes/class-wc-gateway-iyzico-custom.php:137
 msgid "Etkinleştir"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:474
+#: includes/class-wc-gateway-iyzico-custom.php:512
 #. translators: %s: order number
 msgid "Genel"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:237
+#: includes/class-wc-gateway-iyzico-custom.php:204
+msgid "Görünüm"
+msgstr ""
+
+#: includes/class-wc-gateway-iyzico-custom.php:212
+msgid "Güven rozeti ikonları ve metinleri bu rengi kullanır."
+msgstr ""
+
+#: includes/class-wc-gateway-iyzico-custom.php:275
 #: includes/health-check.php:265
 msgid "HATA"
 msgstr ""
@@ -143,19 +159,23 @@ msgstr ""
 msgid "Kart bilgisi sitede tutulmaz"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:141
+#: includes/class-wc-gateway-iyzico-custom.php:153
 msgid "Kartınızla güvenli ödeme yapın. 3D Secure doğrulama sonrası siparişiniz onaylanır."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:233
+#: includes/class-wc-gateway-iyzico-custom.php:223
+msgid "Kenarlık Rengi"
+msgstr ""
+
+#: includes/class-wc-gateway-iyzico-custom.php:271
 msgid "Kontrol başarısız oldu."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:231
+#: includes/class-wc-gateway-iyzico-custom.php:269
 msgid "Kontrol ediliyor (birkaç saniye sürebilir)..."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:134
+#: includes/class-wc-gateway-iyzico-custom.php:146
 msgid "Kredi/Banka Kartı"
 msgstr ""
 
@@ -164,25 +184,33 @@ msgstr ""
 msgid "Kurulu: %1$s (bu plugin %2$s sürümüne kadar test edildi)."
 msgstr ""
 
+#: includes/class-wc-gateway-iyzico-custom.php:216
+msgid "Kutu Arka Plan Rengi"
+msgstr ""
+
+#: includes/class-wc-gateway-iyzico-custom.php:226
+msgid "Kutunun ince kenarlığı."
+msgstr ""
+
 #: includes/health-check.php:40
 #: includes/health-check.php:45
 #. translators: %s: "Sandbox" or "Live"
 msgid "Live"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:159
+#: includes/class-wc-gateway-iyzico-custom.php:171
 msgid "Live API Key"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:163
+#: includes/class-wc-gateway-iyzico-custom.php:175
 msgid "Live Secret Key"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:451
+#: includes/class-wc-gateway-iyzico-custom.php:489
 msgid "Musteri"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:235
+#: includes/class-wc-gateway-iyzico-custom.php:273
 #: includes/health-check.php:263
 msgid "OK"
 msgstr ""
@@ -192,24 +220,24 @@ msgstr ""
 msgid "Sandbox"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:144
+#: includes/class-wc-gateway-iyzico-custom.php:156
 msgid "Sandbox modu"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:192
+#: includes/class-wc-gateway-iyzico-custom.php:230
 msgid "Sağlık Kontrolü"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:473
+#: includes/class-wc-gateway-iyzico-custom.php:511
 #. translators: %s: order number
 msgid "Siparis #%s"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:428
+#: includes/class-wc-gateway-iyzico-custom.php:466
 msgid "Sipariş bulunamadı."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:234
+#: includes/class-wc-gateway-iyzico-custom.php:272
 #: includes/health-check.php:268
 msgid "Son kontrol:"
 msgstr ""
@@ -219,7 +247,7 @@ msgstr ""
 msgid "Sunucu kendi kendine istek atamadı (bazı hostlarda loopback engeli olur): %1$s. Tarayıcıdan elle kontrol et: %2$s"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:187
+#: includes/class-wc-gateway-iyzico-custom.php:199
 msgid "Sunucu Çıkış IP Adresi"
 msgstr ""
 
@@ -228,19 +256,19 @@ msgstr ""
 msgid "Sunucudan iyzico'ya ulaşılamıyor: %s. Hosting firewall'ı dış bağlantıyı engelliyor olabilir."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:232
+#: includes/class-wc-gateway-iyzico-custom.php:270
 msgid "Tamamlandı."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:299
+#: includes/class-wc-gateway-iyzico-custom.php:337
 msgid "Tespit Et"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:313
+#: includes/class-wc-gateway-iyzico-custom.php:351
 msgid "Tespit edilemedi, elle gir."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:311
+#: includes/class-wc-gateway-iyzico-custom.php:349
 msgid "Tespit ediliyor..."
 msgstr ""
 
@@ -249,19 +277,19 @@ msgstr ""
 msgid "Test"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:146
+#: includes/class-wc-gateway-iyzico-custom.php:158
 msgid "Test (sandbox) modunu etkinleştir"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:151
+#: includes/class-wc-gateway-iyzico-custom.php:163
 msgid "Test API Key"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:155
+#: includes/class-wc-gateway-iyzico-custom.php:167
 msgid "Test Secret Key"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:236
+#: includes/class-wc-gateway-iyzico-custom.php:274
 #: includes/health-check.php:264
 msgid "UYARI"
 msgstr ""
@@ -309,7 +337,7 @@ msgstr ""
 msgid "iyzico Checkout Form ile 3D Secure zorunlu ödeme. Kart verisi sitede tutulmaz."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:174
+#: includes/class-wc-gateway-iyzico-custom.php:186
 #. translators: section title shown above the callback URL / IP fields
 msgid "iyzico Paneline Eklenecek Bilgiler"
 msgstr ""
@@ -319,16 +347,16 @@ msgstr ""
 msgid "iyzico doğrulama hatası: %s"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:127
+#: includes/class-wc-gateway-iyzico-custom.php:139
 msgid "iyzico ile ödemeyi etkinleştir"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:182
+#: includes/class-wc-gateway-iyzico-custom.php:194
 #. translators: %s: computed default callback URL
 msgid "iyzico panelinde Back URL olarak bunu kaydet. Boş bırakılırsa siteni home_url() adresinden otomatik hesaplanır (%s)."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:189
+#: includes/class-wc-gateway-iyzico-custom.php:201
 msgid "iyzico panelinde IP Adresleri listesine bunu ekle. \"Tespit Et\" butonu sunucunun iyzico'ya giden isteklerde kullandığı gerçek çıkış IP'sini bulur (ziyaretçi IP'si değil)."
 msgstr ""
 
@@ -346,7 +374,7 @@ msgstr ""
 msgid "iyzico ödeme entegrasyonunda bir sorun tespit edildi:"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:497
+#: includes/class-wc-gateway-iyzico-custom.php:535
 #. translators: %s: iyzico checkout form token
 msgid "iyzico ödeme sayfasına yönlendirildi. Token: %s"
 msgstr ""
@@ -361,7 +389,7 @@ msgstr ""
 msgid "iyzico ödemesi başarısız: %s"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:498
+#: includes/class-wc-gateway-iyzico-custom.php:536
 #. translators: %s: iyzico checkout form token
 msgid "iyzico ödemesi bekleniyor"
 msgstr ""
@@ -370,16 +398,16 @@ msgstr ""
 msgid "son kontrol:"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:490
+#: includes/class-wc-gateway-iyzico-custom.php:528
 #. translators: %s: iyzico error message
 msgid "Ödeme başlatılamadı: %s"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:483
+#: includes/class-wc-gateway-iyzico-custom.php:521
 msgid "Ödeme başlatılırken bir hata oluştu, lütfen tekrar deneyin."
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:434
+#: includes/class-wc-gateway-iyzico-custom.php:472
 msgid "Ödeme sistemi şu anda yapılandırılamamış durumda, lütfen bizimle iletişime geçin."
 msgstr ""
 
@@ -391,7 +419,11 @@ msgstr ""
 msgid "Ödeme yöntemi etkin"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:140
+#: includes/class-wc-gateway-iyzico-custom.php:219
+msgid "Ödeme yöntemi seçildiğinde açılan kutunun arka planı."
+msgstr ""
+
+#: includes/class-wc-gateway-iyzico-custom.php:152
 msgid "Ödeme yöntemi seçildiğinde müşteriye görünen açıklama."
 msgstr ""
 
@@ -405,11 +437,11 @@ msgstr ""
 msgid "Önceki sorun(lar) düzelmiş görünüyor:"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:169
+#: includes/class-wc-gateway-iyzico-custom.php:181
 msgid "İşlem loglarını WooCommerce > Status > Logs altına yaz"
 msgstr ""
 
-#: includes/class-wc-gateway-iyzico-custom.php:217
+#: includes/class-wc-gateway-iyzico-custom.php:255
 msgid "Şimdi Kontrol Et"
 msgstr ""
 
