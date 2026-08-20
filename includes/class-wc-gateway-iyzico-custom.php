@@ -68,6 +68,14 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
         // Checkout sayfasında kart logoları + güven rozetleri için CSS.
         add_action('wp_enqueue_scripts', array($this, 'enqueue_checkout_assets'));
 
+        // TCKN alanı sadece ayarlarda açıksa checkout'a ekleniyor — kapalı
+        // sitelerde eski (alansız) davranış birebir korunuyor.
+        if ('yes' === $this->get_option('identity_field_enabled')) {
+            add_filter('woocommerce_billing_fields', array($this, 'add_identity_billing_field'), 20);
+            add_action('woocommerce_checkout_process', array($this, 'validate_identity_field'));
+            add_action('woocommerce_checkout_update_order_meta', array($this, 'save_identity_field'));
+        }
+
         // NOT: /api/payment/callback isteği artık burada DEĞİL,
         // woo-iyzico-custom.php içinde wic_maybe_handle_callback() ile,
         // doğrudan REQUEST_URI kontrolüyle 'init' seviyesinde yakalanıyor.
@@ -183,6 +191,25 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
                 'type'        => 'checkbox',
                 'label'       => __('İşlem loglarını WooCommerce > Status > Logs altına yaz', 'woo-iyzico-custom'),
                 'default'     => 'yes',
+            ),
+            'identity_title' => array(
+                'title'       => __('TCKN (Kimlik No) Toplama', 'woo-iyzico-custom'),
+                'type'        => 'title',
+                'description' => __('iyzico API\'si her ödemede bir TCKN alanı istiyor; WooCommerce checkout\'u bunu varsayılan olarak toplamaz. Bu alanı açarsan checkout\'a bir "TC Kimlik No" alanı eklenir — zorunlu tutmazsan müşteri boş bırakabilir. Alan kapalıyken, ya da açık olup boş bırakıldığında, Türkiye\'de yaygın kullanılan standart doldurma değeri (11111111111) otomatik gönderilir. Not: bu alan, checkout\'ta hangi ödeme yönteminin seçileceğinden bağımsız olarak eklenir (WooCommerce ödeme yöntemi seçilmeden önce checkout alanlarını oluşturur), yani açarsan tüm siparişlerde görünür.', 'woo-iyzico-custom'),
+            ),
+            'identity_field_enabled' => array(
+                'title'       => __('TCKN Alanını Göster', 'woo-iyzico-custom'),
+                'type'        => 'checkbox',
+                'label'       => __('Checkout\'a TC Kimlik No alanı ekle', 'woo-iyzico-custom'),
+                'default'     => 'no',
+                'description' => __('Kapalıyken checkout\'ta hiçbir şey değişmez, iyzico\'ya otomatik olarak 11111111111 gönderilir.', 'woo-iyzico-custom'),
+            ),
+            'identity_field_required' => array(
+                'title'       => __('TCKN Girişini Zorunlu Kıl', 'woo-iyzico-custom'),
+                'type'        => 'checkbox',
+                'label'       => __('Müşteri TCKN girmeden siparişi tamamlayamasın', 'woo-iyzico-custom'),
+                'default'     => 'no',
+                'description' => __('Yalnızca yukarıdaki alan açıkken etkilidir. Kapalı bırakılırsa alan görünür ama boş geçilebilir; boş geçilirse yine 11111111111 gönderilir.', 'woo-iyzico-custom'),
             ),
             'iyzico_panel_info' => array(
                 /* translators: section title shown above the callback URL / IP fields */
@@ -497,19 +524,93 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
     }
 
     /**
-     * TCKN (kimlik no) alanı iyzico API'sinde zorunlu ama WooCommerce
-     * checkout'u varsayılan olarak bu bilgiyi toplamıyor. Gerçek bir
-     * TCKN alanı eklemek istersen (checkout'a custom field olarak)
-     * bunu ileride ekleyebiliriz — şimdilik telefon numarasından
-     * türetilmiş 11 haneli bir placeholder kullanıyoruz. Bu iyzico'nun
-     * format validasyonunu geçer ama gerçek kimlik doğrulaması değildir;
-     * yüksek hacimli / risk skorlaması hassas mağazalarda gerçek TCKN
-     * toplamak daha sağlıklı olur.
+     * Adds the "TC Kimlik No" field to the billing fieldset. Not tied to a
+     * specific payment method — WooCommerce builds checkout fields before
+     * any gateway is selected — so once enabled it appears regardless of
+     * which payment method the customer ends up choosing.
      */
-    private function derive_identity_number($order) {
-        $digits = preg_replace('/\D/', '', $order->get_billing_phone());
-        $digits = str_pad($digits, 11, '1');
-        return substr($digits, 0, 11);
+    public function add_identity_billing_field($fields) {
+        $fields['billing_tckn'] = array(
+            'label'             => __('TC Kimlik No', 'woo-iyzico-custom'),
+            'type'              => 'text',
+            'required'          => 'yes' === $this->get_option('identity_field_required'),
+            'class'             => array('form-row-wide'),
+            'priority'          => 105,
+            'maxlength'         => 11,
+            'custom_attributes' => array('inputmode' => 'numeric', 'pattern' => '[0-9]{11}'),
+        );
+        return $fields;
+    }
+
+    public function validate_identity_field() {
+        if ('yes' !== $this->get_option('identity_field_required')) {
+            return;
+        }
+
+        $value = isset($_POST['billing_tckn']) ? sanitize_text_field(wp_unslash($_POST['billing_tckn'])) : '';
+
+        if ('' === $value) {
+            wc_add_notice(__('Lütfen TC Kimlik No alanını doldurun.', 'woo-iyzico-custom'), 'error');
+            return;
+        }
+
+        if (!self::is_valid_identity_format($value)) {
+            wc_add_notice(__('TC Kimlik No 11 haneli, 0 ile başlamayan bir sayı olmalı.', 'woo-iyzico-custom'), 'error');
+        }
+    }
+
+    public function save_identity_field($order_id) {
+        if (!isset($_POST['billing_tckn'])) {
+            return;
+        }
+
+        $value = sanitize_text_field(wp_unslash($_POST['billing_tckn']));
+
+        if ('' === $value || !self::is_valid_identity_format($value)) {
+            // Boş ya da hatalı formatlı değeri sessizce yok sayıyoruz;
+            // get_identity_number() zaten standart yer tutucuya (11111111111)
+            // düşecek, checkout'u bu yüzden bloklamıyoruz (validate_identity_field
+            // zorunlu olduğunda zaten ayrı bir hata gösteriyor).
+            return;
+        }
+
+        $order = wc_get_order($order_id);
+        if ($order) {
+            $order->update_meta_data('_billing_tckn', $value);
+            $order->save();
+        }
+    }
+
+    /**
+     * Sadece format kontrolü: tam 11 hane, 0 ile başlamıyor. BİLİNÇLİ
+     * OLARAK resmi TCKN checksum algoritmasını (son iki hanenin ilk 9
+     * haneden hesaplanan doğrulama basamakları olduğu formül) uygulamıyoruz
+     * — bu, ezbere yazılırsa yanlış çıkma riski taşıyan bir matematiksel
+     * kural ve yanlış uygulanırsa GERÇEK geçerli TCKN'leri bile reddedip
+     * müşteriyi checkout'ta tıkatabilir (hiç doğrulama yapmamaktan daha
+     * kötü bir sonuç). Tam checksum doğrulaması eklemek istersen, formülü
+     * birkaç bilinen geçerli TCKN ile test ederek doğrulamamız gerekir.
+     */
+    private static function is_valid_identity_format($value) {
+        return (bool) preg_match('/^[1-9][0-9]{10}$/', $value);
+    }
+
+    /**
+     * TCKN alanı açık ve müşteri gerçek bir değer girdiyse onu kullanır.
+     * Aksi halde (alan kapalı, ya da açık-zorunlu-değil-ve-boş-bırakılmış)
+     * Türkiye'de yaygın kullanılan standart yer tutucuyu (11111111111)
+     * döner — iyzico'nun format validasyonunu geçer, muhasebe
+     * yazılımlarında TCKN bilinmediğinde kullanılan aynı konvansiyon.
+     */
+    private function get_identity_number($order) {
+        if ('yes' === $this->get_option('identity_field_enabled')) {
+            $tckn = $order->get_meta('_billing_tckn');
+            if ($tckn && self::is_valid_identity_format($tckn)) {
+                return $tckn;
+            }
+        }
+
+        return '11111111111';
     }
 
     private function get_country_name($code) {
@@ -570,7 +671,7 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
         $buyer->setId('BY' . $order->get_id());
         $buyer->setName($order->get_billing_first_name() ?: __('Musteri', 'woo-iyzico-custom'));
         $buyer->setSurname($order->get_billing_last_name() ?: '-');
-        $buyer->setIdentityNumber($this->derive_identity_number($order));
+        $buyer->setIdentityNumber($this->get_identity_number($order));
         $buyer->setEmail($order->get_billing_email());
         $buyer->setGsmNumber($order->get_billing_phone());
         $buyer->setRegistrationAddress($order->get_billing_address_1() ?: __('Adres belirtilmedi', 'woo-iyzico-custom'));

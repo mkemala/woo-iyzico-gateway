@@ -28,6 +28,7 @@ Callback endpoint'i WordPress'in rewrite/permalink sistemine **bağımlı değil
 - Ayarlar sayfasında marka renklerine uyarlanabilir checkout görünümü (kart logoları, güven rozetleri)
 - Callback URL ve sunucu çıkış IP'si için otomatik tespit + öneri paneli
 - Yerleşik **sağlık kontrolü**: callback erişilebilirliği, iyzico bağlantısı, API key durumu — anlık ya da günlük otomatik (WP-Cron), sorun tespit edilirse e-posta uyarısı
+- İsteğe bağlı **TCKN alanı**: checkout'a gerçek bir TC Kimlik No alanı eklenebilir (açık/kapalı + zorunlu/isteğe bağlı ayrı ayrı ayarlanabilir), kapalıyken ya da boş bırakıldığında Türkiye'de yaygın kullanılan standart yer tutucu (`11111111111`) otomatik gönderilir
 - Tüm kullanıcıya görünen metinler WordPress i18n standardına (`__()`/`_e()`) uygun, `languages/woo-iyzico-custom.pot` şablonu dahil
 
 ### Kurulum
@@ -45,7 +46,7 @@ Callback endpoint'i WordPress'in rewrite/permalink sistemine **bağımlı değil
 
 ### Bilinen sınırlamalar
 
-- `Buyer.identityNumber` (TCKN) alanı checkout'tan toplanmıyor, telefon numarasından türetilen bir placeholder kullanılıyor (`derive_identity_number()`). Gerçek TCKN toplamak istersen checkout'a custom bir alan eklemek gerekir.
+- `Buyer.identityNumber` (TCKN) alanı artık checkout'a isteğe bağlı bir alan olarak eklenebiliyor (Ayarlar > "TCKN Alanını Göster" / "TCKN Girişini Zorunlu Kıl"). Kapalıyken veya boş bırakıldığında, iyzico'nun kabul ettiği ve Türkiye'de yaygın kullanılan standart yer tutucu (`11111111111`) gönderiliyor — Türkiye'deki birçok muhasebe/faturalama yazılımının da kullandığı aynı konvansiyon. Not: bu alanın format kontrolü var (11 hane, 0 ile başlamıyor) ama resmi TCKN checksum algoritması uygulanmıyor.
 - Basket items tek satır "sipariş özeti" olarak gönderiliyor, ürün bazlı kırılım yok.
 - HMAC signature doğrulaması (`CheckoutForm::getSignature()`) kullanılmıyor — server-to-server retrieve zaten güvenli, ek bir katman istenirse eklenebilir.
 
@@ -56,7 +57,6 @@ Callback endpoint'i WordPress'in rewrite/permalink sistemine **bağımlı değil
 **Planlanan Pro sürüm (ayrı, ücretli):**
 - Çoklu provider desteği (PayTR, Craftgate, Param vb.) — `WC_Gateway_Hosted_Checkout_Base` soyutlaması üzerinden
 - Ürün bazlı satır kırılımlı basket (tek satır özet yerine)
-- Gerçek TCKN toplama alanı (checkout'a entegre, placeholder yerine)
 - Öncelikli destek
 - Fiyatlandırma fikri: $9.99/yıl ya da $29.90 lifetime (kesinleşmedi)
 
@@ -90,6 +90,7 @@ The callback endpoint intentionally does **not** rely on WordPress's rewrite/per
 - Brand-matchable checkout UI (card logos, trust badges) configurable via CSS
 - Auto-detection panel for the callback URL and the server's outbound IP, ready to paste into iyzico's dashboard
 - Built-in **health check system**: verifies callback reachability, connectivity to iyzico, and API key presence — on demand or daily via WP-Cron, with email alerts on status change
+- Optional **TCKN (Turkish national ID) field**: adds a real ID field to checkout, independently toggleable as shown/hidden and required/optional; when off or left blank, sends the standard Turkish placeholder (`11111111111`) automatically
 - All user-facing strings follow WordPress i18n conventions (`__()`/`_e()`), including a `languages/woo-iyzico-custom.pot` template. Source strings are Turkish (iyzico is a Turkey-only payment provider, so that's the realistic user base) — but the plugin is translation-ready for anyone who wants to contribute an English `.po`/`.mo` file.
 
 ### Installation
@@ -107,7 +108,7 @@ The callback endpoint intentionally does **not** rely on WordPress's rewrite/per
 
 ### Known limitations
 
-- `Buyer.identityNumber` (Turkish national ID) isn't collected at checkout; a placeholder derived from the phone number is used instead (`derive_identity_number()`). Add a real checkout field if you need actual ID collection.
+- `Buyer.identityNumber` (Turkish national ID) can now be collected via an optional checkout field (Settings > "Show TCKN Field" / "Require TCKN"). When off, or left blank, the plugin sends the standard placeholder (`11111111111`) accepted by iyzico — the same convention widely used in Turkish accounting/invoicing software. Note: basic format validation only (11 digits, no leading zero) — the official TCKN checksum algorithm isn't implemented.
 - Basket items are sent as a single "order summary" line rather than broken out per product.
 - HMAC signature verification (`CheckoutForm::getSignature()`) isn't used — the server-to-server retrieve is already secure on its own, but this could be added as an extra layer.
 
@@ -118,7 +119,6 @@ The callback endpoint intentionally does **not** rely on WordPress's rewrite/per
 **Planned Pro version (separate, paid):**
 - Multi-provider support (PayTR, Craftgate, Param, etc.) via a `WC_Gateway_Hosted_Checkout_Base` abstraction
 - Per-product basket line items (instead of a single order-summary line)
-- A real Turkish national ID (TCKN) collection field at checkout (instead of the derived placeholder)
 - Priority support
 - Rough pricing idea: $9.99/year or $29.90 lifetime (not finalized)
 
