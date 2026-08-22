@@ -44,12 +44,21 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
     private $logger;
 
     public function __construct() {
+        // icons.php burada, en başta yükleniyor — init_form_fields() (hemen
+        // aşağıda) artık wic_builtin_icon_choices() çağırıyor, get_icon() de
+        // wic_render_builtin_icon() çağırıyor, ikisi de checkout sayfası her
+        // yüklendiğinde (payment_fields() hiç çalışmadan) tetiklenebiliyor.
+        // Önceden bu require sadece payment_fields() içinde vardı — kutu hiç
+        // açılmadan get_icon() çağrılırsa (ki checkout listesi oluşturulurken
+        // hep öyle olur) fatal error'a yol açardı.
+        require_once WIC_PLUGIN_DIR . 'includes/icons.php';
+
         $this->id                 = 'iyzico_custom';
         $this->icon               = '';
         $this->has_fields         = false; // hosted form - kendi kart formumuz yok
         $this->method_title       = __('iyzico (Custom / 3D Secure)', 'woo-iyzico-custom');
         $this->method_description = __('iyzico Checkout Form ile 3D Secure zorunlu ödeme. Kart verisi sitede tutulmaz.', 'woo-iyzico-custom');
-        $this->supports            = array('products');
+        $this->supports            = array('products', 'refunds');
 
         $this->init_form_fields();
         $this->init_settings();
@@ -64,6 +73,10 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
         $this->secret_key = $this->sandbox ? $this->get_option('test_secret_key') : $this->get_option('live_secret_key');
 
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+
+        // Ödeme ikonu (logo) yükleme alanı için medya kütüphanesi
+        // seçiciyi SADECE bu gateway'in kendi ayarlar sayfasında yüklüyoruz.
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_settings_media_picker'));
 
         // Checkout sayfasında kart logoları + güven rozetleri için CSS.
         add_action('wp_enqueue_scripts', array($this, 'enqueue_checkout_assets'));
@@ -85,14 +98,27 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
     }
 
     /**
-     * Checkout'ta ödeme yöntemi başlığının yanına iyzico'nun kendi resmi
-     * "logo band" görselini koyar (Visa/Mastercard/iyzico marka şeridi).
-     * Elle çizilmiş ikonlar yerine bunu kullanıyoruz — resmi ve tanıdık.
+     * Checkout'ta ödeme yöntemi başlığının yanına gösterilecek ikon.
+     *
+     * iyzico'nun kendi resmi görsellerini (logo band, "iyzico ile öde"
+     * rozeti vb.) plugin paketinin İÇİNE GÖMMÜYORUZ — iyzico ile yapılan
+     * yazışma sonucunda, geniş kitlelere açık dağıtımda (WP.org gibi)
+     * marka şeridinin gömülü kullanılmaması istendi. Onun yerine mağaza
+     * sahibi, iyzico'nun resmi indirme sayfasından kendi indirdiği görseli
+     * buradan (Ayarlar > Ödeme İkonu) yükleyebiliyor. Hiçbir şey
+     * yüklenmediyse ikon boş kalır — WooCommerce'te birçok gateway zaten
+     * ikonsuz, sadece başlık metniyle çalışır, bu normal bir durumdur.
      */
     public function get_icon() {
-        $url  = WIC_PLUGIN_URL . 'assets/images/iyzico-logo-band.svg';
-        $icon = '<img src="' . esc_url($url) . '" alt="' . esc_attr__('iyzico', 'woo-iyzico-custom') . '" class="wic-logo-band" />';
-        return apply_filters('woocommerce_gateway_icon', $icon, $this->id);
+        $url = $this->get_option('custom_icon_url');
+
+        if (!empty($url)) {
+            $icon = '<img src="' . esc_url($url) . '" alt="' . esc_attr($this->title) . '" class="wic-custom-icon" />';
+            return apply_filters('woocommerce_gateway_icon', $icon, $this->id);
+        }
+
+        $builtin = wic_render_builtin_icon($this->get_option('builtin_icon'));
+        return apply_filters('woocommerce_gateway_icon', $builtin, $this->id);
     }
 
     /**
@@ -101,8 +127,6 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
      * has_fields=false olduğu için burada kart formu YOK, sadece bilgi.
      */
     public function payment_fields() {
-        require_once WIC_PLUGIN_DIR . 'includes/icons.php';
-
         if ($this->description) {
             echo wp_kses_post(wpautop(wptexturize($this->description)));
         }
@@ -114,6 +138,74 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
         </div>
         <?php
     }
+
+    public function enqueue_settings_media_picker($hook) {
+        static $already_enqueued = false;
+
+        if ('woocommerce_page_wc-settings' !== $hook) {
+            return;
+        }
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only check of which settings tab/section is open, not processing form input.
+        if (!isset($_GET['tab'], $_GET['section']) || 'checkout' !== $_GET['tab'] || $this->id !== $_GET['section']) {
+            return;
+        }
+
+        // WooCommerce'in ayarlar sayfası bazı kurulumlarda admin_enqueue_scripts'i
+        // birden fazla tetikleyebiliyor (ör. bir başka eklenti/tema kendi
+        // admin_enqueue_scripts çağrısını farklı bir hook önceliğinde tekrar
+        // yapıyorsa). Bu olursa, aşağıdaki inline script iki kez enjekte
+        // olur ve "Görsel Seç" butonu + önizleme ikiye katlanır. Bu statik
+        // flag, aynı sayfa yüklemesinde ikinci kez çalışmayı engelliyor.
+        if ($already_enqueued) {
+            return;
+        }
+        $already_enqueued = true;
+
+        wp_enqueue_media();
+
+        $field_id = $this->get_field_key('custom_icon_url');
+        wp_add_inline_script('media-editor', $this->get_media_picker_js($field_id));
+    }
+
+    private function get_media_picker_js($field_id) {
+        $field_id = esc_js($field_id);
+        $select_label = esc_js(__('Ödeme İkonu Seç', 'woo-iyzico-custom'));
+        $button_label = esc_js(__('Görsel Seç', 'woo-iyzico-custom'));
+
+        return "
+        jQuery(function ($) {
+            var field = $('#{$field_id}');
+            if (!field.length) { return; }
+
+            // Ekstra güvenlik: bu alan için buton zaten eklenmişse tekrar ekleme
+            // (server-side static flag'in yakalayamadığı bir durum olursa diye).
+            if (field.data('wicMediaPickerReady')) { return; }
+            field.data('wicMediaPickerReady', true);
+
+            var button = $('<button type=\"button\" class=\"button\" style=\"margin-left:8px;\">{$button_label}</button>');
+            field.after(button);
+
+            var preview = $('<div style=\"margin-top:8px;\"><img id=\"{$field_id}_preview\" src=\"' + field.val() + '\" style=\"max-height:40px;' + (field.val() ? '' : 'display:none;') + '\" /></div>');
+            button.after(preview);
+
+            button.on('click', function (e) {
+                e.preventDefault();
+                var frame = wp.media({
+                    title: '{$select_label}',
+                    multiple: false,
+                    library: { type: 'image' }
+                });
+                frame.on('select', function () {
+                    var attachment = frame.state().get('selection').first().toJSON();
+                    field.val(attachment.url);
+                    $('#{$field_id}_preview').attr('src', attachment.url).show();
+                });
+                frame.open();
+            });
+        });
+        ";
+    }
+
 
     public function enqueue_checkout_assets() {
         if (!function_exists('is_checkout') || !is_checkout()) {
@@ -153,7 +245,7 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
             'title' => array(
                 'title'       => __('Başlık', 'woo-iyzico-custom'),
                 'type'        => 'text',
-                'description' => __('Checkout sayfasında müşteriye görünen başlık. Logo zaten iyzico markasını gösterdiği için başlıkta ayrıca "iyzico" yazmana gerek yok.', 'woo-iyzico-custom'),
+                'description' => __('Checkout sayfasında müşteriye görünen başlık.', 'woo-iyzico-custom'),
                 'default'     => __('Kredi/Banka Kartı', 'woo-iyzico-custom'),
                 'desc_tip'    => false,
             ),
@@ -162,6 +254,25 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
                 'type'        => 'textarea',
                 'description' => __('Ödeme yöntemi seçildiğinde müşteriye görünen açıklama.', 'woo-iyzico-custom'),
                 'default'     => __('Kartınızla güvenli ödeme yapın. 3D Secure doğrulama sonrası siparişiniz onaylanır.', 'woo-iyzico-custom'),
+            ),
+            'builtin_icon' => array(
+                'title'       => __('Hazır İkon', 'woo-iyzico-custom'),
+                'type'        => 'select',
+                'options'     => wic_builtin_icon_choices(),
+                'default'     => '',
+                'description' => __('Marka-bağımsız, plugin\'e gömülü basit bir ikon (SVG). Aşağıda bir görsel yüklersen bu ayar yok sayılır, yüklenen görsel öncelikli olur.', 'woo-iyzico-custom'),
+                'desc_tip'    => false,
+            ),
+            'custom_icon_url' => array(
+                'title'       => __('Özel Görsel Yükle (isteğe bağlı)', 'woo-iyzico-custom'),
+                'type'        => 'text',
+                /* translators: %s: link to iyzico's official logo download page */
+                'description' => sprintf(
+                    __('Yukarıdaki hazır ikon yerine kendi görselini kullanmak istersen buraya yükle — bu alan doluysa hazır ikon ayarı yok sayılır. Bu eklenti hiçbir logoyu paket içine gömmez; istersen iyzico\'nun resmi görsellerini %s adresinden indirip Medya Kütüphanesi\'ne yükleyip burada seçebilirsin. Not: "logo band" (kart şeridi) ya da "iyzico ile öde" rozetlerinden birini seçmen önerilir — download paketindeki diğer varyantlar checkout ikonu için tasarlanmamıştır.', 'woo-iyzico-custom'),
+                    '<a href="https://docs.iyzico.com/ek-bilgiler/iyzico-logo-paketi" target="_blank" rel="noopener noreferrer">docs.iyzico.com</a>'
+                ),
+                'default'     => '',
+                'desc_tip'    => false,
             ),
             'sandbox' => array(
                 'title'       => __('Sandbox modu', 'woo-iyzico-custom'),
@@ -472,6 +583,76 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
         $options->setSecretKey($this->secret_key);
         $options->setBaseUrl($this->sandbox ? 'https://sandbox-api.iyzipay.com' : 'https://api.iyzipay.com');
         return $options;
+    }
+
+    /**
+     * WooCommerce'in "Refund" arayüzü (sipariş ekranındaki "Refund" butonu)
+     * bu metodu çağırıyor. Kısmi tutar desteklenmiyor — iyzico'nun
+     * CreateRefundRequest'i teknik olarak kısmi tutarı kabul ediyor ama
+     * biz şimdilik sadece TAM iadeyi destekliyoruz (Pro'da kısmi iade +
+     * iade geçmişi paneli planlanıyor, bkz. README Yol Haritası).
+     */
+    public function process_refund($order_id, $amount = null, $reason = '') {
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            return new \WP_Error('wic_refund_no_order', __('Sipariş bulunamadı.', 'woo-iyzico-custom'));
+        }
+
+        $payment_transaction_id = $order->get_meta('_wic_payment_transaction_id');
+        if (empty($payment_transaction_id)) {
+            $this->log('Refund: _wic_payment_transaction_id eksik (order #' . $order_id . ').', 'error');
+            return new \WP_Error(
+                'wic_refund_missing_transaction_id',
+                __('Bu sipariş için iyzico işlem numarası bulunamadı. Sipariş bu plugin\'in eski bir sürümüyle mi tamamlanmıştı? İadeyi iyzico Merchant Panel üzerinden manuel yapman gerekebilir.', 'woo-iyzico-custom')
+            );
+        }
+
+        if (null === $amount) {
+            $amount = $order->get_total();
+        }
+
+        if ((float) $amount !== (float) $order->get_total()) {
+            return new \WP_Error(
+                'wic_refund_partial_not_supported',
+                __('Bu sürüm kısmi iadeyi desteklemiyor — sadece siparişin tam tutarını iade edebilirsin.', 'woo-iyzico-custom')
+            );
+        }
+
+        require_once WIC_PLUGIN_DIR . 'vendor/iyzico/iyzipay-php/autoload.php';
+
+        $request = new \Iyzipay\Request\CreateRefundRequest();
+        $request->setLocale(\Iyzipay\Model\Locale::TR);
+        $request->setConversationId((string) $order_id . '-refund-' . uniqid());
+        $request->setPaymentTransactionId($payment_transaction_id);
+        $request->setPrice(number_format((float) $amount, 2, '.', ''));
+        $request->setCurrency(\Iyzipay\Model\Currency::TL);
+        $request->setIp($order->get_customer_ip_address() ?: '127.0.0.1');
+        if (!empty($reason)) {
+            $request->setDescription(sanitize_text_field($reason));
+        }
+
+        try {
+            $refund = \Iyzipay\Model\Refund::create($request, $this->get_iyzico_options());
+        } catch (\Exception $e) {
+            $this->log('Refund exception (order #' . $order_id . '): ' . $e->getMessage(), 'error');
+            return new \WP_Error('wic_refund_exception', $e->getMessage());
+        }
+
+        if ('success' !== $refund->getStatus()) {
+            $error = $refund->getErrorMessage() ?: __('İade işlemi iyzico tarafından reddedildi.', 'woo-iyzico-custom');
+            $this->log('Refund failed (order #' . $order_id . '): ' . $error, 'error');
+            return new \WP_Error('wic_refund_failed', $error);
+        }
+
+        $order->add_order_note(sprintf(
+            /* translators: 1: refunded amount, 2: reason given for the refund, if any */
+            __('iyzico üzerinden %1$s iade edildi. %2$s', 'woo-iyzico-custom'),
+            wc_price($amount),
+            $reason ? '(' . $reason . ')' : ''
+        ));
+        $this->log('Refund success for order #' . $order_id . ', amount: ' . $amount);
+
+        return true;
     }
 
     /**

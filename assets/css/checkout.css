@@ -6,12 +6,21 @@
    paleti) kalır. Kendi CSS'ini yazacaksan da bu custom property'leri
    kullanman yeterli, dosyanın geri kalanına dokunmana gerek yok. */
 
-.wic-logo-band {
+.wic-custom-icon {
     height: 20px;
     width: auto;
     display: inline-block;
     margin-left: 10px;
     vertical-align: middle;
+}
+
+.wic-payment-icon {
+    height: 22px;
+    width: 22px;
+    display: inline-block;
+    margin-left: 10px;
+    vertical-align: middle;
+    color: var(--wic-primary, #2F453A);
 }
 
 ul.payment_methods li.payment_method_iyzico_custom > label {
@@ -59,7 +68,7 @@ ul.payment_methods li.payment_method_iyzico_custom > label {
 }
 
 @media (max-width: 480px) {
-    .wic-logo-band {
+    .wic-custom-icon {
         margin-left: 0;
         margin-top: 4px;
         display: block;

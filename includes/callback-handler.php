@@ -98,6 +98,23 @@ function wic_process_iyzico_callback() {
 
     if ('success' === $checkoutForm->getStatus() && 'SUCCESS' === $checkoutForm->getPaymentStatus()) {
         $order->payment_complete($checkoutForm->getPaymentId());
+
+        // İade API'si (CreateRefundRequest) üstteki paymentId'yi DEĞİL,
+        // paymentItems[] içindeki paymentTransactionId'yi istiyor — iyzico'da
+        // bir "payment" birden fazla "payment item" (sepet kalemi) içerebilir,
+        // her kalemin kendi transaction ID'si var. Biz tek satırlık sepet
+        // gönderdiğimiz için (bkz. process_payment()) burada tam olarak 1
+        // eleman bekleniyor. Bunu ayrıca saklamazsak process_refund() hiç
+        // çalışamaz — WooCommerce'in kendi _transaction_id'si (payment_complete
+        // ile set edilen) bu iş için yanlış ID.
+        $payment_items = $checkoutForm->getPaymentItems();
+        if (!empty($payment_items) && isset($payment_items[0])) {
+            $order->update_meta_data('_wic_payment_transaction_id', $payment_items[0]->getPaymentTransactionId());
+            $order->save();
+        } else {
+            $log('Uyarı: paymentItems boş geldi (order #' . $order->get_id() . '), ileride iade yapılamayabilir.', 'warning');
+        }
+
         $order->add_order_note(sprintf(
             /* translators: 1: iyzico payment ID, 2: iyzico auth code */
             __('iyzico ödemesi başarılı. Payment ID: %1$s, Auth Code: %2$s', 'woo-iyzico-custom'),

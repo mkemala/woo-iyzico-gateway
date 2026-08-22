@@ -14,7 +14,7 @@ iyzico'nun resmi WooCommerce eklentisi düşük puanlı ve versiyon uyumu belirs
 
 ### Nasıl çalışır
 
-1. Müşteri checkout'ta "Kredi/Banka Kartı" (iyzico logo band'i ile) seçeneğini seçer, siparişi oluşturur.
+1. Müşteri checkout'ta "Kredi/Banka Kartı" seçeneğini seçer, siparişi oluşturur.
 2. Plugin, iyzico'ya `CheckoutFormInitialize` isteği atar (`forceThreeDS=1` — sadece 3D Secure).
 3. Müşteri iyzico'nun kendi ödeme sayfasına yönlendirilir — kart bilgisi ve 3D Secure doğrulaması tamamen orada gerçekleşir.
 4. iyzico, ödeme sonucunu `/api/payment/callback` adresine POST eder (token ile birlikte).
@@ -26,6 +26,7 @@ Callback endpoint'i WordPress'in rewrite/permalink sistemine **bağımlı değil
 
 - Hosted Checkout Form akışı — PCI-DSS yükü minimum
 - Ayarlar sayfasında marka renklerine uyarlanabilir checkout görünümü (kart logoları, güven rozetleri)
+- İsteğe bağlı **ödeme ikonu yükleme** (Medya Kütüphanesi seçiciyle): plugin hiçbir logo görselini paket içine gömmez, checkout'ta gösterilecek görseli istersen kendin yüklersin — boşsa sadece başlık metni görünür
 - Callback URL ve sunucu çıkış IP'si için otomatik tespit + öneri paneli
 - Yerleşik **sağlık kontrolü**: callback erişilebilirliği, iyzico bağlantısı, API key durumu — anlık ya da günlük otomatik (WP-Cron), sorun tespit edilirse e-posta uyarısı
 - İsteğe bağlı **TCKN alanı**: checkout'a gerçek bir TC Kimlik No alanı eklenebilir (açık/kapalı + zorunlu/isteğe bağlı ayrı ayrı ayarlanabilir), kapalıyken ya da boş bırakıldığında Türkiye'de yaygın kullanılan standart yer tutucu (`11111111111`) otomatik gönderilir
@@ -52,15 +53,38 @@ Callback endpoint'i WordPress'in rewrite/permalink sistemine **bağımlı değil
 
 ### Yol haritası
 
-**Ücretsiz (bu repo, WordPress.org):** Sadece iyzico, mevcut özellik seti — hosted Checkout Form, sağlık kontrolü, domain/IP paneli. Bu her zaman ücretsiz ve açık kaynak kalacak.
+**Rakip analizi (Ağustos 2026):** iyzico'nun kendi resmi WooCommerce eklentisi WordPress.org'da 1.7/5 puanda (19 yorumdan 14'ü tek yıldız), 10.000+ aktif kurulumu var ama 8 aydır güncellenmemiş. Ortak şikayetler: checkout'ta takılma, güncelleme sonrası bozulma, yanıtsız destek, eksik/topluluk-kaynaklı çeviri. Bu, hem gerçek bir pazar olduğunu (10K+ kurulum) hem de "güvenilir ve bakımlı" olmanın başlı başına bir rekabet avantajı olduğunu gösteriyor.
 
-**Planlanan Pro sürüm (ayrı, ücretli):**
+**Free (bu repo, WordPress.org) — eksiksiz ve güvenilir olmalı, "biraz kısıtlı" değil:**
+- Hosted Checkout Form + 3D Secure zorunlu akış
+- Sandbox / Live mod geçişi
+- Sağlık kontrolü sistemi (callback erişilebilirliği, iyzico bağlantısı, API key durumu — otomatik + e-posta uyarısı)
+- İsteğe bağlı TCKN alanı (aç/kapa + zorunlu/isteğe bağlı)
+- **Temel iade** (WooCommerce sipariş ekranından tam iade) — henüz eklenmedi, temel beklenti sayılıyor, Pro'ya konmayacak
+- 2-3 hazır jenerik ödeme ikonu (marka-bağımsız, elle çizilmiş SVG — hiçbir logo gömülmeyecek)
+- **Tam İngilizce + Türkçe çeviri** (ikisi de free — dil bir pazarlık konusu değil, güven meselesi)
+- Güven rozetleri (SSL, 3DS, kart saklanmaz) — sabit 3 rozet
+- IP/callback otomatik tespit paneli
+- Tek satır sepet özeti
+
+**Planlanan Pro sürüm (ayrı, ücretli, muhtemelen Freemius üzerinden lisanslanacak):**
+- Özel logo/görsel yükleme (Medya Kütüphanesi'nden) + tam Custom CSS + hazır stil şablonları
+- Checkout için Açık / Koyu / Otomatik (ziyaretçinin sistem tercihine göre) tema seçenekleri
+- Güven rozetlerini özelleştirme: aç/kapa, metin değiştirme, kendi rozetini ekleme (ikon kütüphanesinden seç + kendi metni), sıralama
+- Ürün/sepet sayfasında taksit bilgisi gösterimi ("3 taksit x 33 TL" — iyzico SDK'sında hazır API var, şu an hiç kullanılmıyor)
+- Ürün bazlı satır kırılımlı sepet (iyzico paneline detaylı gönderim, tek satır özet yerine)
+- Kısmi iade + iade geçmişi paneli
+- Takılı sipariş otomatik kurtarma (cron ile "pending" siparişleri iyzico'dan tekrar sorgulayıp otomatik çözme — rakibin #1 şikayetine doğrudan çözüm)
 - Çoklu provider desteği (PayTR, Craftgate, Param vb.) — `WC_Gateway_Hosted_Checkout_Base` soyutlaması üzerinden
-- Ürün bazlı satır kırılımlı basket (tek satır özet yerine)
+- HMAC signature doğrulama (ekstra güvenlik katmanı, denetim isteyen büyük mağazalar için)
 - Öncelikli destek
-- Fiyatlandırma fikri: $9.99/yıl ya da $29.90 lifetime (kesinleşmedi)
+- Fiyatlandırma modeli henüz kesinleşmedi (sabit yıllık / lifetime seçenekli — Freemius entegrasyonu sırasında netleşecek)
 
-Bilinçli olarak erken genelleştirmedik (erken soyutlama genelde yanlış soyutlamaya çıkar) — ücretsiz sürümde gerçek kullanıcı geri bildirimi toplandıktan sonra Pro'nun kapsamı netleşecek.
+Bilinçli olarak erken genelleştirmedik (erken soyutlama genelde yanlış soyutlamaya çıkar) — Free sürümde gerçek kullanıcı geri bildirimi toplandıktan sonra Pro'nun kesin kapsamı ve sırası netleşecek. Hepsini aynı anda yapmaya çalışmıyoruz.
+
+### Dil / Language
+
+Bu plugin'in kaynak metinleri (kod içindeki msgid'ler) doğrudan **Türkçe** yazılmıştır — iyzico zaten sadece Türkiye'de çalışan bir servis olduğu için varsayılan/asıl dil budur. Tam bir **İngilizce çevirisi** de pakette geliyor (`languages/woo-iyzico-custom-en_US.po/.mo`) — WordPress sitenin dili İngilizce ise otomatik olarak devreye girer, ayrıca bir şey yapmana gerek yok. Yeni bir dil eklemek istersen `languages/woo-iyzico-custom.pot` şablonunu kullanabilirsin.
 
 ### Lisans
 
@@ -76,7 +100,7 @@ iyzico's official WooCommerce plugin has low ratings and uncertain version compa
 
 ### How it works
 
-1. The customer selects the "Kredi/Banka Kartı" payment method (shown with iyzico's official logo band) at checkout and places the order.
+1. The customer selects the "Kredi/Banka Kartı" payment method at checkout and places the order.
 2. The plugin sends a `CheckoutFormInitialize` request to iyzico (`forceThreeDS=1` — 3D Secure only, non-3DS is disabled).
 3. The customer is redirected to iyzico's own hosted payment page — card data and 3D Secure verification happen entirely there. No card data ever touches this server.
 4. iyzico POSTs the payment result to `/api/payment/callback` (with a token).
@@ -88,6 +112,7 @@ The callback endpoint intentionally does **not** rely on WordPress's rewrite/per
 
 - Hosted Checkout Form flow — minimal PCI-DSS scope
 - Brand-matchable checkout UI (card logos, trust badges) configurable via CSS
+- Optional **payment icon upload** (via the Media Library picker): the plugin bundles no brand imagery at all — you upload your own icon if you want one; leave it blank and only the title text shows
 - Auto-detection panel for the callback URL and the server's outbound IP, ready to paste into iyzico's dashboard
 - Built-in **health check system**: verifies callback reachability, connectivity to iyzico, and API key presence — on demand or daily via WP-Cron, with email alerts on status change
 - Optional **TCKN (Turkish national ID) field**: adds a real ID field to checkout, independently toggleable as shown/hidden and required/optional; when off or left blank, sends the standard Turkish placeholder (`11111111111`) automatically
@@ -114,15 +139,34 @@ The callback endpoint intentionally does **not** rely on WordPress's rewrite/per
 
 ### Roadmap
 
-**Free (this repo, WordPress.org):** iyzico only, current feature set — hosted Checkout Form, health checks, domain/IP panel. This will always stay free and open source.
+**Competitive landscape (August 2026):** iyzico's own official WooCommerce plugin sits at 1.7/5 on WordPress.org (14 of 19 reviews are 1-star), with 10,000+ active installs but no update in 8 months. Common complaints: checkout getting stuck, breakage after updates, unresponsive support, incomplete community-sourced translations. This confirms both a real market (10K+ installs) and that "reliable and actively maintained" is itself a competitive edge here.
 
-**Planned Pro version (separate, paid):**
+**Free (this repo, WordPress.org) — should be complete and trustworthy, not "slightly crippled":**
+- Hosted Checkout Form + mandatory 3D Secure flow
+- Sandbox / Live mode toggle
+- Health check system (callback reachability, iyzico connectivity, API key status — automatic + email alerts)
+- Optional TCKN field (on/off + required/optional)
+- **Basic refunds** (full refund from the WooCommerce order screen) — not built yet, considered baseline, won't be a Pro feature
+- 2-3 built-in generic payment icons (brand-neutral, hand-drawn SVG — no bundled logos)
+- **Complete English + Turkish translations** (both free — language isn't a bargaining chip, it's a trust signal)
+- Trust badges (SSL, 3DS, card not stored) — fixed set of 3
+- Auto-detection panel for callback URL / server outbound IP
+- Single-line basket summary
+
+**Planned Pro version (separate, paid, likely licensed via Freemius):**
+- Custom logo/image upload (via Media Library) + full Custom CSS + ready-made style presets
+- Light / Dark / Auto (matches visitor's system preference) checkout themes
+- Customizable trust badges: toggle on/off, edit text, add your own badge (pick an icon from a small library + write your own text), reorder
+- Installment info display on product/cart pages ("3 installments x 33 TRY" — the iyzico SDK already has the API for this, currently unused)
+- Per-product basket line items (detailed breakdown sent to iyzico's dashboard, instead of a single summary line)
+- Partial refunds + a refund history panel
+- Automatic stuck-order recovery (a cron job that re-queries iyzico for orders stuck in "pending" and resolves them automatically — directly addresses the competitor's #1 complaint)
 - Multi-provider support (PayTR, Craftgate, Param, etc.) via a `WC_Gateway_Hosted_Checkout_Base` abstraction
-- Per-product basket line items (instead of a single order-summary line)
+- HMAC signature verification (an extra security layer for merchants who need it for audits)
 - Priority support
-- Rough pricing idea: $9.99/year or $29.90 lifetime (not finalized)
+- Pricing model not finalized yet (flat annual vs. lifetime option — to be settled during the Freemius integration)
 
-We intentionally didn't generalize early (premature abstraction usually produces the wrong abstraction) — the Pro scope will firm up once the free version has real user feedback behind it.
+We intentionally didn't generalize early (premature abstraction usually produces the wrong abstraction) — the exact Pro scope and sequencing will firm up once the free version has real user feedback behind it. We're not trying to build all of this at once.
 
 ### License
 

@@ -11,229 +11,256 @@ msgstr ""
 "POT-Creation-Date: 2026-08-21 09:14+0000\n"
 "PO-Revision-Date: 2026-08-21 08:00+0000\n"
 "Last-Translator: Mustafa Kemal Alpaslan\n"
-"Language-Team: \n"
-"Language: \n"
-"X-Domain: woo-iyzico-custom\n"
+"Language-Team: English\n"
+"Language: en_US\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Domain: woo-iyzico-custom\n"
 
 #: woo-iyzico-custom.php:40
 msgid ""
 "WooCommerce iyzico Ödeme Ağ Geçidi çalışmak için WooCommerce eklentisinin "
 "aktif olmasını gerektiriyor."
 msgstr ""
+"WooCommerce iyzico Payment Gateway requires the WooCommerce plugin to be "
+"active."
 
 #: woo-iyzico-custom.php:85 includes/health-check.php:240
 msgid "Yetkisiz."
-msgstr ""
+msgstr "Unauthorized."
 
 #: woo-iyzico-custom.php:97
 msgid "IP bulunamadı."
-msgstr ""
+msgstr "IP not found."
 
 #. translators: %s: exception message from the iyzico SDK
 #: includes/callback-handler.php:94
 #, php-format
 msgid "iyzico doğrulama hatası: %s"
-msgstr ""
+msgstr "iyzico verification error: %s"
 
 #. translators: 1: iyzico payment ID, 2: iyzico auth code
 #: includes/callback-handler.php:120
 #, php-format
 msgid "iyzico ödemesi başarılı. Payment ID: %1$s, Auth Code: %2$s"
-msgstr ""
+msgstr "iyzico payment successful. Payment ID: %1$s, Auth Code: %2$s"
 
 #: includes/callback-handler.php:129
 msgid "Ödeme tamamlanamadı."
-msgstr ""
+msgstr "Payment could not be completed."
 
 #. translators: %s: iyzico error message
 #: includes/callback-handler.php:131
 #, php-format
 msgid "iyzico ödemesi başarısız: %s"
-msgstr ""
+msgstr "iyzico payment failed: %s"
 
 #. translators: %s: iyzico error message
 #: includes/callback-handler.php:136
 #, php-format
 msgid "Ödemeniz tamamlanamadı: %s"
-msgstr ""
+msgstr "Your payment could not be completed: %s"
 
 #: includes/class-wc-gateway-iyzico-custom.php:50
 msgid "iyzico (Custom / 3D Secure)"
-msgstr ""
+msgstr "iyzico (Custom / 3D Secure)"
 
 #: includes/class-wc-gateway-iyzico-custom.php:51
 msgid ""
 "iyzico Checkout Form ile 3D Secure zorunlu ödeme. Kart verisi sitede "
 "tutulmaz."
 msgstr ""
+"Mandatory 3D Secure payment via iyzico Checkout Form. Card data is never "
+"stored on this site."
 
 #: includes/class-wc-gateway-iyzico-custom.php:128
 msgid "256-bit SSL ile şifrelenir"
-msgstr ""
+msgstr "Encrypted with 256-bit SSL"
 
 #: includes/class-wc-gateway-iyzico-custom.php:129
 msgid "3D Secure zorunlu doğrulama"
-msgstr ""
+msgstr "Mandatory 3D Secure verification"
 
 #: includes/class-wc-gateway-iyzico-custom.php:130
 msgid "Kart bilgisi sitede tutulmaz"
-msgstr ""
+msgstr "Card details are never stored on this site"
 
 #: includes/class-wc-gateway-iyzico-custom.php:152
 msgid "Ödeme İkonu Seç"
-msgstr ""
+msgstr "Select Payment Icon"
 
 #: includes/class-wc-gateway-iyzico-custom.php:153
 msgid "Görsel Seç"
-msgstr ""
+msgstr "Select Image"
 
 #: includes/class-wc-gateway-iyzico-custom.php:215
 msgid "Etkinleştir"
-msgstr ""
+msgstr "Enable"
 
 #: includes/class-wc-gateway-iyzico-custom.php:217
 msgid "iyzico ile ödemeyi etkinleştir"
-msgstr ""
+msgstr "Enable payment via iyzico"
 
 #: includes/class-wc-gateway-iyzico-custom.php:221
 msgid "Başlık"
-msgstr ""
+msgstr "Title"
 
 #: includes/class-wc-gateway-iyzico-custom.php:223
 msgid "Checkout sayfasında müşteriye görünen başlık."
-msgstr ""
+msgstr "The title customers see at checkout."
 
 #: includes/class-wc-gateway-iyzico-custom.php:224
 msgid "Kredi/Banka Kartı"
-msgstr ""
+msgstr "Credit/Debit Card"
 
 #: includes/class-wc-gateway-iyzico-custom.php:228
 msgid "Açıklama"
-msgstr ""
+msgstr "Description"
 
 #: includes/class-wc-gateway-iyzico-custom.php:230
 msgid "Ödeme yöntemi seçildiğinde müşteriye görünen açıklama."
-msgstr ""
+msgstr "The description customers see when this payment method is selected."
 
 #: includes/class-wc-gateway-iyzico-custom.php:231
 msgid ""
 "Kartınızla güvenli ödeme yapın. 3D Secure doğrulama sonrası siparişiniz "
 "onaylanır."
 msgstr ""
+"Pay securely with your card. Your order is confirmed after 3D Secure "
+"verification."
 
 #: includes/class-wc-gateway-iyzico-custom.php:234
 msgid "Hazır İkon"
-msgstr ""
+msgstr "Built-in Icon"
 
 #: includes/class-wc-gateway-iyzico-custom.php:238
 msgid ""
 "Marka-bağımsız, plugin'e gömülü basit bir ikon (SVG). Aşağıda bir görsel "
 "yüklersen bu ayar yok sayılır, yüklenen görsel öncelikli olur."
 msgstr ""
+"A simple, brand-neutral icon bundled with the plugin (SVG). If you upload an"
+" image below, this setting is ignored — the uploaded image takes priority."
 
 #: includes/class-wc-gateway-iyzico-custom.php:242
 msgid "Özel Görsel Yükle (isteğe bağlı)"
-msgstr ""
+msgstr "Upload a Custom Image (optional)"
 
 #: includes/class-wc-gateway-iyzico-custom.php:246
 #, php-format
 msgid ""
-"Yukarıdaki hazır ikon yerine kendi görselini kullanmak istersen buraya yükle "
-"— bu alan doluysa hazır ikon ayarı yok sayılır. Bu eklenti hiçbir logoyu "
+"Yukarıdaki hazır ikon yerine kendi görselini kullanmak istersen buraya yükle"
+" — bu alan doluysa hazır ikon ayarı yok sayılır. Bu eklenti hiçbir logoyu "
 "paket içine gömmez; istersen iyzico'nun resmi görsellerini %s adresinden "
 "indirip Medya Kütüphanesi'ne yükleyip burada seçebilirsin. Not: \"logo "
 "band\" (kart şeridi) ya da \"iyzico ile öde\" rozetlerinden birini seçmen "
 "önerilir — download paketindeki diğer varyantlar checkout ikonu için "
 "tasarlanmamıştır."
 msgstr ""
+"Upload your own image here if you'd rather use it instead of the built-in "
+"icon above — if this field is filled in, the built-in icon setting is "
+"ignored. This plugin bundles no logos of its own; if you'd like, you can "
+"download iyzico's official images from %s, upload them to your Media "
+"Library, and select one here. Note: it's recommended to pick one of the "
+"\"logo band\" (card strip) or \"Pay with iyzico\" badge variants — the other"
+" variants in the download pack weren't designed for the checkout icon slot."
 
 #: includes/class-wc-gateway-iyzico-custom.php:253
 msgid "Sandbox modu"
-msgstr ""
+msgstr "Sandbox Mode"
 
 #: includes/class-wc-gateway-iyzico-custom.php:255
 msgid "Test (sandbox) modunu etkinleştir"
-msgstr ""
+msgstr "Enable test (sandbox) mode"
 
 #: includes/class-wc-gateway-iyzico-custom.php:257
 msgid "Canlıya almadan önce mutlaka sandbox key'leriyle uçtan uca test et."
-msgstr ""
+msgstr "Always test end-to-end with sandbox keys before going live."
 
 #: includes/class-wc-gateway-iyzico-custom.php:260
 msgid "Test API Key"
-msgstr ""
+msgstr "Test API Key"
 
 #: includes/class-wc-gateway-iyzico-custom.php:264
 msgid "Test Secret Key"
-msgstr ""
+msgstr "Test Secret Key"
 
 #: includes/class-wc-gateway-iyzico-custom.php:268
 msgid "Live API Key"
-msgstr ""
+msgstr "Live API Key"
 
 #: includes/class-wc-gateway-iyzico-custom.php:272
 msgid "Live Secret Key"
-msgstr ""
+msgstr "Live Secret Key"
 
 #: includes/class-wc-gateway-iyzico-custom.php:276
 msgid "Debug log"
-msgstr ""
+msgstr "Debug Log"
 
 #: includes/class-wc-gateway-iyzico-custom.php:278
 msgid "İşlem loglarını WooCommerce > Status > Logs altına yaz"
-msgstr ""
+msgstr "Write transaction logs to WooCommerce > Status > Logs"
 
 #: includes/class-wc-gateway-iyzico-custom.php:282
 msgid "TCKN (Kimlik No) Toplama"
-msgstr ""
+msgstr "TCKN (National ID) Collection"
 
 #: includes/class-wc-gateway-iyzico-custom.php:284
 msgid ""
 "iyzico API'si her ödemede bir TCKN alanı istiyor; WooCommerce checkout'u "
-"bunu varsayılan olarak toplamaz. Bu alanı açarsan checkout'a bir \"TC Kimlik "
-"No\" alanı eklenir — zorunlu tutmazsan müşteri boş bırakabilir. Alan "
-"kapalıyken, ya da açık olup boş bırakıldığında, Türkiye'de yaygın kullanılan "
-"standart doldurma değeri (11111111111) otomatik gönderilir. Not: bu alan, "
+"bunu varsayılan olarak toplamaz. Bu alanı açarsan checkout'a bir \"TC Kimlik"
+" No\" alanı eklenir — zorunlu tutmazsan müşteri boş bırakabilir. Alan "
+"kapalıyken, ya da açık olup boş bırakıldığında, Türkiye'de yaygın kullanılan"
+" standart doldurma değeri (11111111111) otomatik gönderilir. Not: bu alan, "
 "checkout'ta hangi ödeme yönteminin seçileceğinden bağımsız olarak eklenir "
 "(WooCommerce ödeme yöntemi seçilmeden önce checkout alanlarını oluşturur), "
 "yani açarsan tüm siparişlerde görünür."
 msgstr ""
+"The iyzico API requires a TCKN (Turkish national ID) field on every payment;"
+" WooCommerce checkout doesn't collect this by default. Turning this on adds "
+"a \"TC Identity Number\" field to checkout — if you don't make it required, "
+"customers can leave it blank. When the field is off, or on but left blank, "
+"the standard placeholder widely used in Turkey (11111111111) is sent "
+"automatically. Note: this field is added independently of which payment "
+"method ends up being selected (WooCommerce builds checkout fields before any"
+" gateway is chosen), so turning it on shows it on every order."
 
 #: includes/class-wc-gateway-iyzico-custom.php:287
 msgid "TCKN Alanını Göster"
-msgstr ""
+msgstr "Show TCKN Field"
 
 #: includes/class-wc-gateway-iyzico-custom.php:289
 msgid "Checkout'a TC Kimlik No alanı ekle"
-msgstr ""
+msgstr "Add a TC Identity Number field to checkout"
 
 #: includes/class-wc-gateway-iyzico-custom.php:291
 msgid ""
 "Kapalıyken checkout'ta hiçbir şey değişmez, iyzico'ya otomatik olarak "
 "11111111111 gönderilir."
 msgstr ""
+"When off, nothing changes at checkout — 11111111111 is sent to iyzico "
+"automatically."
 
 #: includes/class-wc-gateway-iyzico-custom.php:294
 msgid "TCKN Girişini Zorunlu Kıl"
-msgstr ""
+msgstr "Require TCKN Entry"
 
 #: includes/class-wc-gateway-iyzico-custom.php:296
 msgid "Müşteri TCKN girmeden siparişi tamamlayamasın"
-msgstr ""
+msgstr "Don't let customers complete their order without entering a TCKN"
 
 #: includes/class-wc-gateway-iyzico-custom.php:298
 msgid ""
 "Yalnızca yukarıdaki alan açıkken etkilidir. Kapalı bırakılırsa alan görünür "
 "ama boş geçilebilir; boş geçilirse yine 11111111111 gönderilir."
 msgstr ""
+"Only takes effect when the field above is on. If left off, the field is "
+"visible but can be skipped; if skipped, 11111111111 is sent instead."
 
 #. translators: section title shown above the callback URL / IP fields
 #: includes/class-wc-gateway-iyzico-custom.php:302
 msgid "iyzico Paneline Eklenecek Bilgiler"
-msgstr ""
+msgstr "Info to Add in the iyzico Panel"
 
 #: includes/class-wc-gateway-iyzico-custom.php:304
 msgid ""
@@ -243,10 +270,15 @@ msgid ""
 "kullanıyorsan) elle düzeltebilirsin, plugin gerçekten burada yazan değeri "
 "kullanır."
 msgstr ""
+"You need to add these values in the iyzico panel under Settings > IP/Back "
+"URL Management and submit them for approval. The fields below are editable —"
+" if the auto-detected value is wrong (e.g. you're using a domain with a "
+"redirect), you can correct it manually; the plugin uses exactly what's "
+"entered here."
 
 #: includes/class-wc-gateway-iyzico-custom.php:307
 msgid "Callback URL"
-msgstr ""
+msgstr "Callback URL"
 
 #. translators: %s: computed default callback URL
 #: includes/class-wc-gateway-iyzico-custom.php:310
@@ -255,10 +287,12 @@ msgid ""
 "iyzico panelinde Back URL olarak bunu kaydet. Boş bırakılırsa siteni "
 "home_url() adresinden otomatik hesaplanır (%s)."
 msgstr ""
+"Save this as the Back URL in the iyzico panel. If left blank, it's "
+"calculated automatically from your site's home_url() (%s)."
 
 #: includes/class-wc-gateway-iyzico-custom.php:315
 msgid "Sunucu Çıkış IP Adresi"
-msgstr ""
+msgstr "Server Outbound IP Address"
 
 #: includes/class-wc-gateway-iyzico-custom.php:317
 msgid ""
@@ -266,157 +300,176 @@ msgid ""
 "sunucunun iyzico'ya giden isteklerde kullandığı gerçek çıkış IP'sini bulur "
 "(ziyaretçi IP'si değil)."
 msgstr ""
+"Add this to the IP Addresses list in the iyzico panel. The \"Detect\" button"
+" finds the actual outbound IP your server uses when reaching iyzico (not the"
+" visitor's IP)."
 
 #: includes/class-wc-gateway-iyzico-custom.php:320
 msgid "Faydalı Linkler"
-msgstr ""
+msgstr "Useful Links"
 
 #: includes/class-wc-gateway-iyzico-custom.php:324
 msgid "Görünüm"
-msgstr ""
+msgstr "Appearance"
 
 #: includes/class-wc-gateway-iyzico-custom.php:326
 msgid ""
-"Checkout'ta ödeme kutusunun rengini kendi marka renklerine uyarlayabilirsin. "
-"Hiçbir şey değiştirmezsen mevcut yeşil palet kalır."
+"Checkout'ta ödeme kutusunun rengini kendi marka renklerine uyarlayabilirsin."
+" Hiçbir şey değiştirmezsen mevcut yeşil palet kalır."
 msgstr ""
+"You can match the checkout box's colors to your own brand. If you don't "
+"change anything, the current green palette stays."
 
 #: includes/class-wc-gateway-iyzico-custom.php:329
 msgid "Ana Renk"
-msgstr ""
+msgstr "Primary Color"
 
 #: includes/class-wc-gateway-iyzico-custom.php:332
 msgid "Güven rozeti ikonları ve metinleri bu rengi kullanır."
-msgstr ""
+msgstr "Trust badge icons and text use this color."
 
 #: includes/class-wc-gateway-iyzico-custom.php:336
 msgid "Kutu Arka Plan Rengi"
-msgstr ""
+msgstr "Box Background Color"
 
 #: includes/class-wc-gateway-iyzico-custom.php:339
 msgid "Ödeme yöntemi seçildiğinde açılan kutunun arka planı."
 msgstr ""
+"The background of the box that opens when this payment method is selected."
 
 #: includes/class-wc-gateway-iyzico-custom.php:343
 msgid "Kenarlık Rengi"
-msgstr ""
+msgstr "Border Color"
 
 #: includes/class-wc-gateway-iyzico-custom.php:346
 msgid "Kutunun ince kenarlığı."
-msgstr ""
+msgstr "The box's thin border."
 
 #: includes/class-wc-gateway-iyzico-custom.php:350
 msgid "Sağlık Kontrolü"
-msgstr ""
+msgstr "Health Check"
 
 #. translators: %s: site admin email address
 #: includes/class-wc-gateway-iyzico-custom.php:353
 #, php-format
 msgid ""
-"Callback endpoint erişilebilir mi, iyzico'ya ağ bağlantısı var mı, API key/"
-"secret dolu mu — bugüne kadar elle yaptığımız kontrolleri "
+"Callback endpoint erişilebilir mi, iyzico'ya ağ bağlantısı var mı, API "
+"key/secret dolu mu — bugüne kadar elle yaptığımız kontrolleri "
 "otomatikleştiriyor. Günde bir kez arka planda da çalışır; bir sorun tespit "
 "edilir (veya düzelir) ise %s adresine otomatik e-posta gider."
 msgstr ""
+"Automates the checks we used to do by hand: is the callback endpoint "
+"reachable, is there network connectivity to iyzico, are the API key/secret "
+"filled in. Also runs once a day in the background; if a problem is detected "
+"(or resolved), an email is automatically sent to %s."
 
 #: includes/class-wc-gateway-iyzico-custom.php:356
 msgid "Durum"
-msgstr ""
+msgstr "Status"
 
 #: includes/class-wc-gateway-iyzico-custom.php:375
 msgid "Şimdi Kontrol Et"
-msgstr ""
+msgstr "Check Now"
 
 #: includes/class-wc-gateway-iyzico-custom.php:389
 msgid "Kontrol ediliyor (birkaç saniye sürebilir)..."
-msgstr ""
+msgstr "Checking (this may take a few seconds)..."
 
 #: includes/class-wc-gateway-iyzico-custom.php:390
 msgid "Tamamlandı."
-msgstr ""
+msgstr "Done."
 
 #: includes/class-wc-gateway-iyzico-custom.php:391
 msgid "Kontrol başarısız oldu."
-msgstr ""
+msgstr "Check failed."
 
 #: includes/class-wc-gateway-iyzico-custom.php:392
 #: includes/health-check.php:268
 msgid "Son kontrol:"
-msgstr ""
+msgstr "Last checked:"
 
 #: includes/class-wc-gateway-iyzico-custom.php:393
 #: includes/health-check.php:263
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: includes/class-wc-gateway-iyzico-custom.php:394
 #: includes/health-check.php:264
 msgid "UYARI"
-msgstr ""
+msgstr "WARNING"
 
 #: includes/class-wc-gateway-iyzico-custom.php:395
 #: includes/health-check.php:265
 msgid "HATA"
-msgstr ""
+msgstr "ERROR"
 
 #: includes/class-wc-gateway-iyzico-custom.php:452
 msgid "Başlarken"
-msgstr ""
+msgstr "Getting Started"
 
 #: includes/class-wc-gateway-iyzico-custom.php:454
 msgid ""
 "Sandbox modunda başla — Test API Key/Secret'ı iyzico'nun sandbox panelinden "
 "(sandbox-merchant.iyzipay.com) al, aşağıdaki ilgili alanlara gir."
 msgstr ""
+"Start in sandbox mode — get your Test API Key/Secret from iyzico's sandbox "
+"panel (sandbox-merchant.iyzipay.com) and enter them in the fields below."
 
 #: includes/class-wc-gateway-iyzico-custom.php:455
 msgid ""
 "Aşağıdaki \"Callback URL\" ve \"Sunucu Çıkış IP Adresi\" değerlerini iyzico "
 "panelinde Ayarlar > IP/Back URL Yönetimi'ne ekleyip onaya gönder."
 msgstr ""
+"Add the \"Callback URL\" and \"Server Outbound IP Address\" values below to "
+"Settings > IP/Back URL Management in the iyzico panel, and submit them for "
+"approval."
 
 #: includes/class-wc-gateway-iyzico-custom.php:456
 msgid "iyzico'nun sandbox test kartlarından biriyle bir sipariş tamamla."
-msgstr ""
+msgstr "Complete an order using one of iyzico's sandbox test cards."
 
 #: includes/class-wc-gateway-iyzico-custom.php:457
 msgid ""
 "En alttaki Sağlık Kontrolü bölümünden \"Şimdi Kontrol Et\"e bas — hepsi "
 "yeşil olmalı."
 msgstr ""
+"Click \"Check Now\" in the Health Check section at the bottom — everything "
+"should be green."
 
 #: includes/class-wc-gateway-iyzico-custom.php:458
 msgid ""
 "Onay tamamlanınca: Sandbox modunu kapat, Live key'leri gir, küçük tutarlı "
 "bir gerçek işlemle son kez test et."
 msgstr ""
+"Once approved: turn off sandbox mode, enter your live keys, and do one final"
+" test with a small real transaction."
 
 #. translators: %s: link to the plugin's GitHub README
 #: includes/class-wc-gateway-iyzico-custom.php:464
 #, php-format
 msgid "Daha fazla ayrıntı için: %s"
-msgstr ""
+msgstr "For more details: %s"
 
 #: includes/class-wc-gateway-iyzico-custom.php:493
 msgid "Tespit Et"
-msgstr ""
+msgstr "Detect"
 
 #: includes/class-wc-gateway-iyzico-custom.php:505
 msgid "Tespit ediliyor..."
-msgstr ""
+msgstr "Detecting..."
 
 #: includes/class-wc-gateway-iyzico-custom.php:506
 msgid "Bulundu — kaydetmeyi unutma."
-msgstr ""
+msgstr "Found — don't forget to save."
 
 #: includes/class-wc-gateway-iyzico-custom.php:507
 msgid "Tespit edilemedi, elle gir."
-msgstr ""
+msgstr "Couldn't be detected, enter it manually."
 
 #: includes/class-wc-gateway-iyzico-custom.php:573
 #: includes/class-wc-gateway-iyzico-custom.php:805
 msgid "Sipariş bulunamadı."
-msgstr ""
+msgstr "Order not found."
 
 #: includes/class-wc-gateway-iyzico-custom.php:581
 msgid ""
@@ -424,141 +477,150 @@ msgid ""
 "bir sürümüyle mi tamamlanmıştı? İadeyi iyzico Merchant Panel üzerinden "
 "manuel yapman gerekebilir."
 msgstr ""
+"No iyzico transaction ID was found for this order. Was it completed with an "
+"older version of this plugin? You may need to process the refund manually "
+"via the iyzico Merchant Panel."
 
 #: includes/class-wc-gateway-iyzico-custom.php:592
 msgid ""
 "Bu sürüm kısmi iadeyi desteklemiyor — sadece siparişin tam tutarını iade "
 "edebilirsin."
 msgstr ""
+"This version doesn't support partial refunds — you can only refund the "
+"order's full amount."
 
 #: includes/class-wc-gateway-iyzico-custom.php:617
 msgid "İade işlemi iyzico tarafından reddedildi."
-msgstr ""
+msgstr "The refund was rejected by iyzico."
 
 #. translators: 1: refunded amount, 2: reason given for the refund, if any
 #: includes/class-wc-gateway-iyzico-custom.php:624
 #, php-format
 msgid "iyzico üzerinden %1$s iade edildi. %2$s"
-msgstr ""
+msgstr "%1$s refunded via iyzico. %2$s"
 
 #: includes/class-wc-gateway-iyzico-custom.php:662
 msgid "Sandbox Panel"
-msgstr ""
+msgstr "Sandbox Panel"
 
 #: includes/class-wc-gateway-iyzico-custom.php:663
 msgid "Live Panel"
-msgstr ""
+msgstr "Live Panel"
 
 #: includes/class-wc-gateway-iyzico-custom.php:672
 msgid "Dokümantasyon"
-msgstr ""
+msgstr "Documentation"
 
 #: includes/class-wc-gateway-iyzico-custom.php:674
 msgid ""
 "Test kartı numaraları dokümantasyon sitesindeki \"Test Kartları\" bölümünde "
 "— güncel liste zaman zaman değişebildiği için buraya sabit yazmadık."
 msgstr ""
+"Test card numbers are in the \"Test Cards\" section of the documentation "
+"site — we didn't hardcode them here since the current list can change from "
+"time to time."
 
 #: includes/class-wc-gateway-iyzico-custom.php:690
 msgid "TC Kimlik No"
-msgstr ""
+msgstr "TC Identity Number"
 
 #: includes/class-wc-gateway-iyzico-custom.php:709
 msgid "Lütfen TC Kimlik No alanını doldurun."
-msgstr ""
+msgstr "Please fill in the TC Identity Number field."
 
 #: includes/class-wc-gateway-iyzico-custom.php:714
 msgid "TC Kimlik No 11 haneli, 0 ile başlamayan bir sayı olmalı."
 msgstr ""
+"TC Identity Number must be an 11-digit number that doesn't start with 0."
 
 #: includes/class-wc-gateway-iyzico-custom.php:811
 msgid ""
 "Ödeme sistemi şu anda yapılandırılamamış durumda, lütfen bizimle iletişime "
 "geçin."
-msgstr ""
+msgstr "The payment system isn't configured right now, please contact us."
 
 #: includes/class-wc-gateway-iyzico-custom.php:828
 msgid "Musteri"
-msgstr ""
+msgstr "Customer"
 
 #: includes/class-wc-gateway-iyzico-custom.php:833
 msgid "Adres belirtilmedi"
-msgstr ""
+msgstr "No address provided"
 
 #. translators: %s: order number
 #: includes/class-wc-gateway-iyzico-custom.php:850
 #, php-format
 msgid "Siparis #%s"
-msgstr ""
+msgstr "Order #%s"
 
 #: includes/class-wc-gateway-iyzico-custom.php:851
 msgid "Genel"
-msgstr ""
+msgstr "General"
 
 #: includes/class-wc-gateway-iyzico-custom.php:860
 msgid "Ödeme başlatılırken bir hata oluştu, lütfen tekrar deneyin."
-msgstr ""
+msgstr "An error occurred while starting the payment, please try again."
 
 #. translators: %s: iyzico error message
 #: includes/class-wc-gateway-iyzico-custom.php:867
 #, php-format
 msgid "Ödeme başlatılamadı: %s"
-msgstr ""
+msgstr "Payment could not be started: %s"
 
 #. translators: %s: iyzico checkout form token
 #: includes/class-wc-gateway-iyzico-custom.php:874
 #, php-format
 msgid "iyzico ödeme sayfasına yönlendirildi. Token: %s"
-msgstr ""
+msgstr "Redirected to the iyzico payment page. Token: %s"
 
 #: includes/class-wc-gateway-iyzico-custom.php:875
 msgid "iyzico ödemesi bekleniyor"
-msgstr ""
+msgstr "iyzico payment pending"
 
 #: includes/health-check.php:27
 msgid "Ödeme yöntemi etkin"
-msgstr ""
+msgstr "Payment Method Enabled"
 
 #: includes/health-check.php:30
 msgid "Etkin."
-msgstr ""
+msgstr "Enabled."
 
 #: includes/health-check.php:31
 msgid "Etkin değil — müşteriler checkout'ta bu yöntemi göremez."
-msgstr ""
+msgstr "Not enabled — customers won't see this method at checkout."
 
 #. translators: %s: "Sandbox" or "Live"
 #: includes/health-check.php:40
 #, php-format
 msgid "%s API key/secret dolu"
-msgstr ""
+msgstr "%s API key/secret filled in"
 
 #: includes/health-check.php:40
 msgid "Sandbox"
-msgstr ""
+msgstr "Sandbox"
 
 #: includes/health-check.php:40 includes/health-check.php:45
 msgid "Live"
-msgstr ""
+msgstr "Live"
 
 #: includes/health-check.php:43
 msgid "Dolu."
-msgstr ""
+msgstr "Filled in."
 
 #. translators: %s: "Test" or "Live"
 #: includes/health-check.php:45
 #, php-format
 msgid "%s API Key/Secret eksik."
-msgstr ""
+msgstr "%s API Key/Secret is missing."
 
 #: includes/health-check.php:45
 msgid "Test"
-msgstr ""
+msgstr "Test"
 
 #: includes/health-check.php:65 includes/health-check.php:80
 #: includes/health-check.php:86
 msgid "Callback endpoint erişilebilir"
-msgstr ""
+msgstr "Callback Endpoint Reachable"
 
 #: includes/health-check.php:69
 #, php-format
@@ -566,24 +628,28 @@ msgid ""
 "Sunucu kendi kendine istek atamadı (bazı hostlarda loopback engeli olur): "
 "%1$s. Tarayıcıdan elle kontrol et: %2$s"
 msgstr ""
+"The server couldn't request itself (some hosts block loopback requests): "
+"%1$s. Check manually from a browser: %2$s"
 
 #. translators: %d: HTTP status code
 #: includes/health-check.php:83
 #, php-format
 msgid "Doğru şekilde yönlendirme yapıyor (HTTP %d)."
-msgstr ""
+msgstr "Redirecting correctly (HTTP %d)."
 
 #. translators: %d: HTTP status code
 #: includes/health-check.php:89
 #, php-format
 msgid ""
-"Beklenmeyen yanıt: HTTP %d. Başka bir plugin bu path'i ele geçirmiş olabilir "
-"(rewrite/cache/güvenlik eklentisi kontrol et)."
+"Beklenmeyen yanıt: HTTP %d. Başka bir plugin bu path'i ele geçirmiş olabilir"
+" (rewrite/cache/güvenlik eklentisi kontrol et)."
 msgstr ""
+"Unexpected response: HTTP %d. Another plugin may be intercepting this path "
+"(check rewrite/cache/security plugins)."
 
 #: includes/health-check.php:100 includes/health-check.php:106
 msgid "iyzico sunucularına bağlantı"
-msgstr ""
+msgstr "Connection to iyzico Servers"
 
 #. translators: %s: WP_Error message
 #: includes/health-check.php:103
@@ -592,85 +658,89 @@ msgid ""
 "Sunucudan iyzico'ya ulaşılamıyor: %s. Hosting firewall'ı dış bağlantıyı "
 "engelliyor olabilir."
 msgstr ""
+"Can't reach iyzico from the server: %s. Your hosting firewall may be "
+"blocking outbound connections."
 
 #. translators: %d: HTTP status code
 #: includes/health-check.php:109
 #, php-format
 msgid "Bağlantı kuruldu (HTTP %d)."
-msgstr ""
+msgstr "Connection established (HTTP %d)."
 
 #: includes/health-check.php:115
 msgid "WooCommerce aktif"
-msgstr ""
+msgstr "WooCommerce Active"
 
 #: includes/health-check.php:117
 msgid "WooCommerce aktif değil."
-msgstr ""
+msgstr "WooCommerce is not active."
 
 #: includes/health-check.php:127
 msgid "WooCommerce sürümü"
-msgstr ""
+msgstr "WooCommerce Version"
 
 #. translators: 1: installed WC version, 2: tested-up-to version
 #: includes/health-check.php:130
 #, php-format
 msgid "Kurulu: %1$s (bu plugin %2$s sürümüne kadar test edildi)."
-msgstr ""
+msgstr "Installed: %1$s (this plugin is tested up to version %2$s)."
 
 #. translators: %s: site name
 #: includes/health-check.php:188
 #, php-format
 msgid "[%s] iyzico ödeme sistemi sorunlu görünüyor"
-msgstr ""
+msgstr "[%s] iyzico payment system appears to have an issue"
 
 #: includes/health-check.php:189
 msgid "iyzico ödeme entegrasyonunda bir sorun tespit edildi:"
-msgstr ""
+msgstr "An issue was detected with the iyzico payment integration:"
 
 #. translators: %s: site name
 #: includes/health-check.php:192
 #, php-format
 msgid "[%s] iyzico ödeme sistemi normale döndü"
-msgstr ""
+msgstr "[%s] iyzico payment system is back to normal"
 
 #: includes/health-check.php:193
 msgid "Önceki sorun(lar) düzelmiş görünüyor:"
-msgstr ""
+msgstr "The previous issue(s) appear to be resolved:"
 
 #: includes/health-check.php:200
 msgid "Detaylar:"
-msgstr ""
+msgstr "Details:"
 
 #: includes/health-check.php:222
 msgid "iyzico ödeme entegrasyonunda bir sorun tespit edildi"
-msgstr ""
+msgstr "An issue was detected with the iyzico payment integration"
 
 #: includes/health-check.php:223
 msgid "son kontrol:"
-msgstr ""
+msgstr "last checked:"
 
 #: includes/health-check.php:224
 msgid "Ayarlar sayfasından detayları gör"
-msgstr ""
+msgstr "View details from the settings page"
 
 #: includes/health-check.php:258
 msgid ""
-"Henüz kontrol çalıştırılmadı. \"Şimdi Kontrol Et\" butonuna bas ya da günlük "
-"otomatik kontrolü bekle."
+"Henüz kontrol çalıştırılmadı. \"Şimdi Kontrol Et\" butonuna bas ya da günlük"
+" otomatik kontrolü bekle."
 msgstr ""
+"No check has been run yet. Click \"Check Now\" or wait for the daily "
+"automatic check."
 
 #: includes/icons.php:79
 msgid "Yok (sadece başlık metni)"
-msgstr ""
+msgstr "None (title text only)"
 
 #: includes/icons.php:80
 msgid "Kart (basit)"
-msgstr ""
+msgstr "Card (simple)"
 
 #: includes/icons.php:81
 msgid "Kart + Kilit"
-msgstr ""
+msgstr "Card + Lock"
 
 #: includes/icons.php:82
 msgid "Onay İşareti"
-msgstr ""
+msgstr "Checkmark"
