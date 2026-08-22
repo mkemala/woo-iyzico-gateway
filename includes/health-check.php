@@ -24,11 +24,11 @@ function wic_run_health_checks() {
     // 1. Ödeme yöntemi etkin mi?
     $enabled = isset($settings['enabled']) && 'yes' === $settings['enabled'];
     $checks['enabled'] = array(
-        'label'   => __('Ödeme yöntemi etkin', 'woo-iyzico-custom'),
+        'label'   => __('Ödeme yöntemi etkin', 'iyzico-payment-gateway'),
         'status'  => $enabled ? 'ok' : 'warning',
         'message' => $enabled
-            ? __('Etkin.', 'woo-iyzico-custom')
-            : __('Etkin değil — müşteriler checkout\'ta bu yöntemi göremez.', 'woo-iyzico-custom'),
+            ? __('Etkin.', 'iyzico-payment-gateway')
+            : __('Etkin değil — müşteriler checkout\'ta bu yöntemi göremez.', 'iyzico-payment-gateway'),
     );
 
     // 2. API key/secret dolu mu? (aktif mod hangisiyse onu kontrol et)
@@ -37,12 +37,12 @@ function wic_run_health_checks() {
     $keys_ok    = !empty($api_key) && !empty($secret_key);
     $checks['keys'] = array(
         /* translators: %s: "Sandbox" or "Live" */
-        'label'   => sprintf(__('%s API key/secret dolu', 'woo-iyzico-custom'), $sandbox ? __('Sandbox', 'woo-iyzico-custom') : __('Live', 'woo-iyzico-custom')),
+        'label'   => sprintf(__('%s API key/secret dolu', 'iyzico-payment-gateway'), $sandbox ? __('Sandbox', 'iyzico-payment-gateway') : __('Live', 'iyzico-payment-gateway')),
         'status'  => $keys_ok ? 'ok' : 'error',
         'message' => $keys_ok
-            ? __('Dolu.', 'woo-iyzico-custom')
+            ? __('Dolu.', 'iyzico-payment-gateway')
             /* translators: %s: "Test" or "Live" */
-            : sprintf(__('%s API Key/Secret eksik.', 'woo-iyzico-custom'), $sandbox ? __('Test', 'woo-iyzico-custom') : __('Live', 'woo-iyzico-custom')),
+            : sprintf(__('%s API Key/Secret eksik.', 'iyzico-payment-gateway'), $sandbox ? __('Test', 'iyzico-payment-gateway') : __('Live', 'iyzico-payment-gateway')),
     );
 
     // 3. Callback endpoint'i gerçekten çalışıyor mu?
@@ -62,11 +62,11 @@ function wic_run_health_checks() {
 
     if (is_wp_error($response)) {
         $checks['callback'] = array(
-            'label'   => __('Callback endpoint erişilebilir', 'woo-iyzico-custom'),
+            'label'   => __('Callback endpoint erişilebilir', 'iyzico-payment-gateway'),
             'status'  => 'warning',
             /* translators: 1: WP_Error message, 2: callback URL */
             'message' => sprintf(
-                __('Sunucu kendi kendine istek atamadı (bazı hostlarda loopback engeli olur): %1$s. Tarayıcıdan elle kontrol et: %2$s', 'woo-iyzico-custom'),
+                __('Sunucu kendi kendine istek atamadı (bazı hostlarda loopback engeli olur): %1$s. Tarayıcıdan elle kontrol et: %2$s', 'iyzico-payment-gateway'),
                 $response->get_error_message(),
                 esc_url($callback_url)
             ),
@@ -77,16 +77,16 @@ function wic_run_health_checks() {
 
         $checks['callback'] = $is_redirect
             ? array(
-                'label'   => __('Callback endpoint erişilebilir', 'woo-iyzico-custom'),
+                'label'   => __('Callback endpoint erişilebilir', 'iyzico-payment-gateway'),
                 'status'  => 'ok',
                 /* translators: %d: HTTP status code */
-                'message' => sprintf(__('Doğru şekilde yönlendirme yapıyor (HTTP %d).', 'woo-iyzico-custom'), $code),
+                'message' => sprintf(__('Doğru şekilde yönlendirme yapıyor (HTTP %d).', 'iyzico-payment-gateway'), $code),
             )
             : array(
-                'label'   => __('Callback endpoint erişilebilir', 'woo-iyzico-custom'),
+                'label'   => __('Callback endpoint erişilebilir', 'iyzico-payment-gateway'),
                 'status'  => 'error',
                 /* translators: %d: HTTP status code */
-                'message' => sprintf(__('Beklenmeyen yanıt: HTTP %d. Başka bir plugin bu path\'i ele geçirmiş olabilir (rewrite/cache/güvenlik eklentisi kontrol et).', 'woo-iyzico-custom'), $code),
+                'message' => sprintf(__('Beklenmeyen yanıt: HTTP %d. Başka bir plugin bu path\'i ele geçirmiş olabilir (rewrite/cache/güvenlik eklentisi kontrol et).', 'iyzico-payment-gateway'), $code),
             );
     }
 
@@ -97,24 +97,24 @@ function wic_run_health_checks() {
 
     $checks['connectivity'] = is_wp_error($ping)
         ? array(
-            'label'   => __('iyzico sunucularına bağlantı', 'woo-iyzico-custom'),
+            'label'   => __('iyzico sunucularına bağlantı', 'iyzico-payment-gateway'),
             'status'  => 'error',
             /* translators: %s: WP_Error message */
-            'message' => sprintf(__('Sunucudan iyzico\'ya ulaşılamıyor: %s. Hosting firewall\'ı dış bağlantıyı engelliyor olabilir.', 'woo-iyzico-custom'), $ping->get_error_message()),
+            'message' => sprintf(__('Sunucudan iyzico\'ya ulaşılamıyor: %s. Hosting firewall\'ı dış bağlantıyı engelliyor olabilir.', 'iyzico-payment-gateway'), $ping->get_error_message()),
         )
         : array(
-            'label'   => __('iyzico sunucularına bağlantı', 'woo-iyzico-custom'),
+            'label'   => __('iyzico sunucularına bağlantı', 'iyzico-payment-gateway'),
             'status'  => 'ok',
             /* translators: %d: HTTP status code */
-            'message' => sprintf(__('Bağlantı kuruldu (HTTP %d).', 'woo-iyzico-custom'), wp_remote_retrieve_response_code($ping)),
+            'message' => sprintf(__('Bağlantı kuruldu (HTTP %d).', 'iyzico-payment-gateway'), wp_remote_retrieve_response_code($ping)),
         );
 
     // 5. WooCommerce aktif ve sürüm uyumlu mu?
     if (!class_exists('WooCommerce')) {
         $checks['woocommerce'] = array(
-            'label'   => __('WooCommerce aktif', 'woo-iyzico-custom'),
+            'label'   => __('WooCommerce aktif', 'iyzico-payment-gateway'),
             'status'  => 'error',
-            'message' => __('WooCommerce aktif değil.', 'woo-iyzico-custom'),
+            'message' => __('WooCommerce aktif değil.', 'iyzico-payment-gateway'),
         );
     } else {
         $tested_up_to  = '11.0';
@@ -124,10 +124,10 @@ function wic_run_health_checks() {
         // neredeyse hiçbir zaman ödeme gateway API'sini kırmıyor).
         $current_minor = implode('.', array_slice(explode('.', $current), 0, 2));
         $checks['woocommerce'] = array(
-            'label'   => __('WooCommerce sürümü', 'woo-iyzico-custom'),
+            'label'   => __('WooCommerce sürümü', 'iyzico-payment-gateway'),
             'status'  => version_compare($current_minor, $tested_up_to, '>') ? 'warning' : 'ok',
             /* translators: 1: installed WC version, 2: tested-up-to version */
-            'message' => sprintf(__('Kurulu: %1$s (bu plugin %2$s sürümüne kadar test edildi).', 'woo-iyzico-custom'), $current, $tested_up_to),
+            'message' => sprintf(__('Kurulu: %1$s (bu plugin %2$s sürümüne kadar test edildi).', 'iyzico-payment-gateway'), $current, $tested_up_to),
         );
     }
 
@@ -185,19 +185,19 @@ function wic_send_health_alert_email($checks, $status) {
 
     if ('error' === $status) {
         /* translators: %s: site name */
-        $subject = sprintf(__('[%s] iyzico ödeme sistemi sorunlu görünüyor', 'woo-iyzico-custom'), $site);
-        $body    = __('iyzico ödeme entegrasyonunda bir sorun tespit edildi:', 'woo-iyzico-custom') . "\n\n";
+        $subject = sprintf(__('[%s] iyzico ödeme sistemi sorunlu görünüyor', 'iyzico-payment-gateway'), $site);
+        $body    = __('iyzico ödeme entegrasyonunda bir sorun tespit edildi:', 'iyzico-payment-gateway') . "\n\n";
     } else {
         /* translators: %s: site name */
-        $subject = sprintf(__('[%s] iyzico ödeme sistemi normale döndü', 'woo-iyzico-custom'), $site);
-        $body    = __('Önceki sorun(lar) düzelmiş görünüyor:', 'woo-iyzico-custom') . "\n\n";
+        $subject = sprintf(__('[%s] iyzico ödeme sistemi normale döndü', 'iyzico-payment-gateway'), $site);
+        $body    = __('Önceki sorun(lar) düzelmiş görünüyor:', 'iyzico-payment-gateway') . "\n\n";
     }
 
     foreach ($checks as $check) {
         $body .= '- ' . $check['label'] . ': ' . strtoupper($check['status']) . ' — ' . $check['message'] . "\n";
     }
 
-    $body .= "\n" . __('Detaylar:', 'woo-iyzico-custom') . ' ' . admin_url('admin.php?page=wc-settings&tab=checkout&section=iyzico_custom');
+    $body .= "\n" . __('Detaylar:', 'iyzico-payment-gateway') . ' ' . admin_url('admin.php?page=wc-settings&tab=checkout&section=iyzico_custom');
 
     wp_mail($to, $subject, $body);
 }
@@ -219,9 +219,9 @@ function wic_health_admin_notice() {
     ?>
     <div class="notice notice-error">
         <p>
-            <strong><?php esc_html_e('iyzico ödeme entegrasyonunda bir sorun tespit edildi', 'woo-iyzico-custom'); ?></strong>
-            (<?php esc_html_e('son kontrol:', 'woo-iyzico-custom'); ?> <?php echo esc_html($last['time']); ?>).
-            <a href="<?php echo esc_url($settings_url); ?>"><?php esc_html_e('Ayarlar sayfasından detayları gör', 'woo-iyzico-custom'); ?></a>.
+            <strong><?php esc_html_e('iyzico ödeme entegrasyonunda bir sorun tespit edildi', 'iyzico-payment-gateway'); ?></strong>
+            (<?php esc_html_e('son kontrol:', 'iyzico-payment-gateway'); ?> <?php echo esc_html($last['time']); ?>).
+            <a href="<?php echo esc_url($settings_url); ?>"><?php esc_html_e('Ayarlar sayfasından detayları gör', 'iyzico-payment-gateway'); ?></a>.
         </p>
     </div>
     <?php
@@ -237,7 +237,7 @@ function wic_ajax_run_health_check() {
     check_ajax_referer('wic_health_check', 'nonce');
 
     if (!current_user_can('manage_woocommerce')) {
-        wp_send_json_error(array('message' => __('Yetkisiz.', 'woo-iyzico-custom')), 403);
+        wp_send_json_error(array('message' => __('Yetkisiz.', 'iyzico-payment-gateway')), 403);
     }
 
     $checks = wic_run_health_checks();
@@ -255,17 +255,17 @@ function wic_ajax_run_health_check() {
 
 function wic_render_health_results_html($last) {
     if (empty($last) || empty($last['checks'])) {
-        return '<p style="color:#666;margin:0;">' . esc_html__('Henüz kontrol çalıştırılmadı. "Şimdi Kontrol Et" butonuna bas ya da günlük otomatik kontrolü bekle.', 'woo-iyzico-custom') . '</p>';
+        return '<p style="color:#666;margin:0;">' . esc_html__('Henüz kontrol çalıştırılmadı. "Şimdi Kontrol Et" butonuna bas ya da günlük otomatik kontrolü bekle.', 'iyzico-payment-gateway') . '</p>';
     }
 
     $colors = array('ok' => '#2e7d32', 'warning' => '#b8860b', 'error' => '#c62828');
     $labels = array(
-        'ok'      => __('OK', 'woo-iyzico-custom'),
-        'warning' => __('UYARI', 'woo-iyzico-custom'),
-        'error'   => __('HATA', 'woo-iyzico-custom'),
+        'ok'      => __('OK', 'iyzico-payment-gateway'),
+        'warning' => __('UYARI', 'iyzico-payment-gateway'),
+        'error'   => __('HATA', 'iyzico-payment-gateway'),
     );
 
-    $html = '<p style="color:#666;margin:0 0 6px;">' . esc_html__('Son kontrol:', 'woo-iyzico-custom') . ' ' . esc_html($last['time']) . '</p>';
+    $html = '<p style="color:#666;margin:0 0 6px;">' . esc_html__('Son kontrol:', 'iyzico-payment-gateway') . ' ' . esc_html($last['time']) . '</p>';
     $html .= '<ul style="margin:0;padding-left:18px;">';
 
     foreach ($last['checks'] as $check) {

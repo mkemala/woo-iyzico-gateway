@@ -76,10 +76,10 @@ function wic_svg_icon_checkmark() {
  */
 function wic_builtin_icon_choices() {
     return array(
-        ''              => __('Yok (sadece başlık metni)', 'woo-iyzico-custom'),
-        'card'          => __('Kart (basit)', 'woo-iyzico-custom'),
-        'secure_card'   => __('Kart + Kilit', 'woo-iyzico-custom'),
-        'checkmark'     => __('Onay İşareti', 'woo-iyzico-custom'),
+        ''              => __('Yok (sadece başlık metni)', 'iyzico-payment-gateway'),
+        'card'          => __('Kart (basit)', 'iyzico-payment-gateway'),
+        'secure_card'   => __('Kart + Kilit', 'iyzico-payment-gateway'),
+        'checkmark'     => __('Onay İşareti', 'iyzico-payment-gateway'),
     );
 }
 

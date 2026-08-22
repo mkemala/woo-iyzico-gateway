@@ -91,7 +91,7 @@ function wic_process_iyzico_callback() {
     } catch (\Exception $e) {
         $log('CheckoutForm retrieve exception (order #' . $order->get_id() . '): ' . $e->getMessage(), 'error');
         /* translators: %s: exception message from the iyzico SDK */
-        $order->update_status('failed', sprintf(__('iyzico doğrulama hatası: %s', 'woo-iyzico-custom'), $e->getMessage()));
+        $order->update_status('failed', sprintf(__('iyzico doğrulama hatası: %s', 'iyzico-payment-gateway'), $e->getMessage()));
         wp_safe_redirect(wc_get_checkout_url());
         exit;
     }
@@ -117,7 +117,7 @@ function wic_process_iyzico_callback() {
 
         $order->add_order_note(sprintf(
             /* translators: 1: iyzico payment ID, 2: iyzico auth code */
-            __('iyzico ödemesi başarılı. Payment ID: %1$s, Auth Code: %2$s', 'woo-iyzico-custom'),
+            __('iyzico ödemesi başarılı. Payment ID: %1$s, Auth Code: %2$s', 'iyzico-payment-gateway'),
             $checkoutForm->getPaymentId(),
             $checkoutForm->getAuthCode()
         ));
@@ -126,14 +126,14 @@ function wic_process_iyzico_callback() {
         exit;
     }
 
-    $errorMessage = $checkoutForm->getErrorMessage() ?: __('Ödeme tamamlanamadı.', 'woo-iyzico-custom');
+    $errorMessage = $checkoutForm->getErrorMessage() ?: __('Ödeme tamamlanamadı.', 'iyzico-payment-gateway');
     /* translators: %s: iyzico error message */
-    $order->update_status('failed', sprintf(__('iyzico ödemesi başarısız: %s', 'woo-iyzico-custom'), $errorMessage));
+    $order->update_status('failed', sprintf(__('iyzico ödemesi başarısız: %s', 'iyzico-payment-gateway'), $errorMessage));
     $log('Payment failed for order #' . $order->get_id() . ': ' . $errorMessage, 'error');
 
     if (function_exists('wc_add_notice')) {
         /* translators: %s: iyzico error message */
-        wc_add_notice(sprintf(__('Ödemeniz tamamlanamadı: %s', 'woo-iyzico-custom'), $errorMessage), 'error');
+        wc_add_notice(sprintf(__('Ödemeniz tamamlanamadı: %s', 'iyzico-payment-gateway'), $errorMessage), 'error');
     }
     wp_safe_redirect(wc_get_checkout_url());
     exit;

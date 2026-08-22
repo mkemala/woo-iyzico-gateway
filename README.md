@@ -1,4 +1,4 @@
-# WooCommerce iyzico Ödeme Ağ Geçidi (Custom)
+# iyzico Payment Gateway for WooCommerce
 
 iyzico Checkout Form (hosted, 3D Secure zorunlu) tabanlı, sıfırdan yazılmış bir WooCommerce ödeme eklentisi. Kart verisi hiçbir zaman bu sunucudan geçmez — müşteri iyzico'nun kendi ödeme sayfasına yönlenir.
 
@@ -20,7 +20,7 @@ iyzico'nun resmi WooCommerce eklentisi düşük puanlı ve versiyon uyumu belirs
 4. iyzico, ödeme sonucunu `/api/payment/callback` adresine POST eder (token ile birlikte).
 5. Plugin, o token'ı **kendi secret key'iyle iyzico'ya sorup** (server-to-server) gerçek sonucu doğrular, siparişi `processing`/`failed` yapar.
 
-Callback endpoint'i WordPress'in rewrite/permalink sistemine **bağımlı değil** — doğrudan `REQUEST_URI` kontrolüyle `init` seviyesinde yakalanıyor. Bunun sebebi: production'da başka bir plugin'in `query_vars` filtresini ezmesi yüzünden rewrite-rule tabanlı yaklaşım güvenilmez çıktı (detaylar `woo-iyzico-custom.php` içindeki yorumda).
+Callback endpoint'i WordPress'in rewrite/permalink sistemine **bağımlı değil** — doğrudan `REQUEST_URI` kontrolüyle `init` seviyesinde yakalanıyor. Bunun sebebi: production'da başka bir plugin'in `query_vars` filtresini ezmesi yüzünden rewrite-rule tabanlı yaklaşım güvenilmez çıktı (detaylar `iyzico-payment-gateway.php` içindeki yorumda).
 
 ### Özellikler
 
@@ -30,7 +30,7 @@ Callback endpoint'i WordPress'in rewrite/permalink sistemine **bağımlı değil
 - Callback URL ve sunucu çıkış IP'si için otomatik tespit + öneri paneli
 - Yerleşik **sağlık kontrolü**: callback erişilebilirliği, iyzico bağlantısı, API key durumu — anlık ya da günlük otomatik (WP-Cron), sorun tespit edilirse e-posta uyarısı
 - İsteğe bağlı **TCKN alanı**: checkout'a gerçek bir TC Kimlik No alanı eklenebilir (açık/kapalı + zorunlu/isteğe bağlı ayrı ayrı ayarlanabilir), kapalıyken ya da boş bırakıldığında Türkiye'de yaygın kullanılan standart yer tutucu (`11111111111`) otomatik gönderilir
-- Tüm kullanıcıya görünen metinler WordPress i18n standardına (`__()`/`_e()`) uygun, `languages/woo-iyzico-custom.pot` şablonu dahil
+- Tüm kullanıcıya görünen metinler WordPress i18n standardına (`__()`/`_e()`) uygun, `languages/iyzico-payment-gateway.pot` şablonu dahil
 
 ### Kurulum
 
@@ -84,7 +84,7 @@ Bilinçli olarak erken genelleştirmedik (erken soyutlama genelde yanlış soyut
 
 ### Dil / Language
 
-Bu plugin'in kaynak metinleri (kod içindeki msgid'ler) doğrudan **Türkçe** yazılmıştır — iyzico zaten sadece Türkiye'de çalışan bir servis olduğu için varsayılan/asıl dil budur. Tam bir **İngilizce çevirisi** de pakette geliyor (`languages/woo-iyzico-custom-en_US.po/.mo`) — WordPress sitenin dili İngilizce ise otomatik olarak devreye girer, ayrıca bir şey yapmana gerek yok. Yeni bir dil eklemek istersen `languages/woo-iyzico-custom.pot` şablonunu kullanabilirsin.
+Bu plugin'in kaynak metinleri (kod içindeki msgid'ler) doğrudan **Türkçe** yazılmıştır — iyzico zaten sadece Türkiye'de çalışan bir servis olduğu için varsayılan/asıl dil budur. Tam bir **İngilizce çevirisi** de pakette geliyor (`languages/iyzico-payment-gateway-en_US.po/.mo`) — WordPress sitenin dili İngilizce ise otomatik olarak devreye girer, ayrıca bir şey yapmana gerek yok. Yeni bir dil eklemek istersen `languages/iyzico-payment-gateway.pot` şablonunu kullanabilirsin.
 
 ### Lisans
 
@@ -106,7 +106,7 @@ iyzico's official WooCommerce plugin has low ratings and uncertain version compa
 4. iyzico POSTs the payment result to `/api/payment/callback` (with a token).
 5. The plugin looks up that token **against iyzico itself, server-to-server, using its own secret key** — it never trusts the POST body blindly — then marks the order `processing`/`failed` accordingly.
 
-The callback endpoint intentionally does **not** rely on WordPress's rewrite/permalink system. It's caught via a direct `REQUEST_URI` check at the `init` hook instead. Reason: in production, another active plugin was silently stripping our custom `query_vars` entry, which made the rewrite-rule based approach unreliable (see the comment in `woo-iyzico-custom.php` for the full story).
+The callback endpoint intentionally does **not** rely on WordPress's rewrite/permalink system. It's caught via a direct `REQUEST_URI` check at the `init` hook instead. Reason: in production, another active plugin was silently stripping our custom `query_vars` entry, which made the rewrite-rule based approach unreliable (see the comment in `iyzico-payment-gateway.php` for the full story).
 
 ### Features
 
@@ -116,7 +116,7 @@ The callback endpoint intentionally does **not** rely on WordPress's rewrite/per
 - Auto-detection panel for the callback URL and the server's outbound IP, ready to paste into iyzico's dashboard
 - Built-in **health check system**: verifies callback reachability, connectivity to iyzico, and API key presence — on demand or daily via WP-Cron, with email alerts on status change
 - Optional **TCKN (Turkish national ID) field**: adds a real ID field to checkout, independently toggleable as shown/hidden and required/optional; when off or left blank, sends the standard Turkish placeholder (`11111111111`) automatically
-- All user-facing strings follow WordPress i18n conventions (`__()`/`_e()`), including a `languages/woo-iyzico-custom.pot` template. Source strings are Turkish (iyzico is a Turkey-only payment provider, so that's the realistic user base) — but the plugin is translation-ready for anyone who wants to contribute an English `.po`/`.mo` file.
+- All user-facing strings follow WordPress i18n conventions (`__()`/`_e()`), including a `languages/iyzico-payment-gateway.pot` template. Source strings are Turkish (iyzico is a Turkey-only payment provider, so that's the realistic default), with a complete English translation shipped in the box (`languages/iyzico-payment-gateway-en_US.po`/`.mo`) — it loads automatically on English-language WordPress sites.
 
 ### Installation
 

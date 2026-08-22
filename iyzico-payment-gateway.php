@@ -1,14 +1,20 @@
 <?php
 /**
- * Plugin Name: WooCommerce iyzico Ödeme Ağ Geçidi (Custom)
+ * Plugin Name: iyzico Payment Gateway for WooCommerce
+ * Plugin URI: https://github.com/mkemala/woo-iyzico-gateway
  * Description: iyzico Checkout Form (hosted, 3D Secure) ile WooCommerce entegrasyonu. Kart verisi sitede tutulmaz.
  * Version: 1.4.0
- * Author: Gazi / Pibakom Group
- * Text Domain: woo-iyzico-custom
+ * Requires at least: 6.0
+ * Requires PHP: 7.4
+ * Author: Mustafa Kemal Alpaslan
+ * Author URI: https://github.com/mkemala
+ * License: MIT
+ * License URI: https://opensource.org/licenses/MIT
+ * Text Domain: iyzico-payment-gateway
+ * Domain Path: /languages
  * Requires Plugins: woocommerce
  * WC requires at least: 6.0
  * WC tested up to: 11.0
- * Domain Path: /languages
  */
 
 if (!defined('ABSPATH')) {
@@ -27,7 +33,7 @@ define('WIC_VERSION', '1.4.0');
  * standart WordPress i18n akışı burada devreye girer.
  */
 add_action('plugins_loaded', function () {
-    load_plugin_textdomain('woo-iyzico-custom', false, dirname(plugin_basename(WIC_PLUGIN_FILE)) . '/languages');
+    load_plugin_textdomain('iyzico-payment-gateway', false, dirname(plugin_basename(WIC_PLUGIN_FILE)) . '/languages');
 });
 
 /**
@@ -37,7 +43,7 @@ add_action('plugins_loaded', function () {
 function wic_woocommerce_missing_notice() {
     ?>
     <div class="notice notice-error">
-        <p><?php esc_html_e('WooCommerce iyzico Ödeme Ağ Geçidi çalışmak için WooCommerce eklentisinin aktif olmasını gerektiriyor.', 'woo-iyzico-custom'); ?></p>
+        <p><?php esc_html_e('WooCommerce iyzico Ödeme Ağ Geçidi çalışmak için WooCommerce eklentisinin aktif olmasını gerektiriyor.', 'iyzico-payment-gateway'); ?></p>
     </div>
     <?php
 }
@@ -82,7 +88,7 @@ function wic_ajax_detect_ip() {
     check_ajax_referer('wic_detect_ip', 'nonce');
 
     if (!current_user_can('manage_woocommerce')) {
-        wp_send_json_error(array('message' => __('Yetkisiz.', 'woo-iyzico-custom')), 403);
+        wp_send_json_error(array('message' => __('Yetkisiz.', 'iyzico-payment-gateway')), 403);
     }
 
     $response = wp_remote_get('https://api.ipify.org?format=json', array('timeout' => 8));
@@ -94,7 +100,7 @@ function wic_ajax_detect_ip() {
     $body = json_decode(wp_remote_retrieve_body($response), true);
 
     if (empty($body['ip'])) {
-        wp_send_json_error(array('message' => __('IP bulunamadı.', 'woo-iyzico-custom')));
+        wp_send_json_error(array('message' => __('IP bulunamadı.', 'iyzico-payment-gateway')));
     }
 
     wp_send_json_success(array('ip' => sanitize_text_field($body['ip'])));
