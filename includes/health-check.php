@@ -64,8 +64,8 @@ function wic_run_health_checks() {
         $checks['callback'] = array(
             'label'   => __('Callback endpoint erişilebilir', 'iyzico-payment-gateway'),
             'status'  => 'warning',
-            /* translators: 1: WP_Error message, 2: callback URL */
             'message' => sprintf(
+                /* translators: 1: WP_Error message, 2: callback URL */
                 __('Sunucu kendi kendine istek atamadı (bazı hostlarda loopback engeli olur): %1$s. Tarayıcıdan elle kontrol et: %2$s', 'iyzico-payment-gateway'),
                 $response->get_error_message(),
                 esc_url($callback_url)

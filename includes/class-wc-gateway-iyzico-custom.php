@@ -132,8 +132,11 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
         }
         ?>
         <div class="wic-trust-badges">
+            <?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wic_svg_lock() returns a hardcoded, plugin-authored SVG string (see includes/icons.php); no user input reaches this output. ?>
             <span class="wic-trust-badge"><?php echo wic_svg_lock(); ?> <?php esc_html_e('256-bit SSL ile şifrelenir', 'iyzico-payment-gateway'); ?></span>
+            <?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wic_svg_shield() returns a hardcoded, plugin-authored SVG string (see includes/icons.php); no user input reaches this output. ?>
             <span class="wic-trust-badge"><?php echo wic_svg_shield(); ?> <?php esc_html_e('3D Secure zorunlu doğrulama', 'iyzico-payment-gateway'); ?></span>
+            <?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wic_svg_no_card() returns a hardcoded, plugin-authored SVG string (see includes/icons.php); no user input reaches this output. ?>
             <span class="wic-trust-badge"><?php echo wic_svg_no_card(); ?> <?php esc_html_e('Kart bilgisi sitede tutulmaz', 'iyzico-payment-gateway'); ?></span>
         </div>
         <?php
@@ -266,8 +269,8 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
             'custom_icon_url' => array(
                 'title'       => __('Özel Görsel Yükle (isteğe bağlı)', 'iyzico-payment-gateway'),
                 'type'        => 'text',
-                /* translators: %s: link to iyzico's official logo download page */
                 'description' => sprintf(
+                    /* translators: %s: link to iyzico's official logo download page */
                     __('Yukarıdaki hazır ikon yerine kendi görselini kullanmak istersen buraya yükle — bu alan doluysa hazır ikon ayarı yok sayılır. Bu eklenti hiçbir logoyu paket içine gömmez; istersen iyzico\'nun resmi görsellerini %s adresinden indirip Medya Kütüphanesi\'ne yükleyip burada seçebilirsin. Not: "logo band" (kart şeridi) ya da "iyzico ile öde" rozetlerinden birini seçmen önerilir — download paketindeki diğer varyantlar checkout ikonu için tasarlanmamıştır.', 'iyzico-payment-gateway'),
                     '<a href="https://docs.iyzico.com/ek-bilgiler/iyzico-logo-paketi" target="_blank" rel="noopener noreferrer">docs.iyzico.com</a>'
                 ),
@@ -728,6 +731,7 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
             return;
         }
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Runs inside woocommerce_checkout_process, which WC_Checkout::process_checkout() only calls after it has already verified the 'woocommerce-process-checkout' nonce itself.
         $value = isset($_POST['billing_tckn']) ? sanitize_text_field(wp_unslash($_POST['billing_tckn'])) : '';
 
         if ('' === $value) {
@@ -741,10 +745,12 @@ class WC_Gateway_Iyzico_Custom extends WC_Payment_Gateway {
     }
 
     public function save_identity_field($order_id) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Runs inside woocommerce_checkout_update_order_meta, which WC_Checkout::process_checkout() only calls after it has already verified the 'woocommerce-process-checkout' nonce itself.
         if (!isset($_POST['billing_tckn'])) {
             return;
         }
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Same hook, same upstream nonce verification as above.
         $value = sanitize_text_field(wp_unslash($_POST['billing_tckn']));
 
         if ('' === $value || !self::is_valid_identity_format($value)) {

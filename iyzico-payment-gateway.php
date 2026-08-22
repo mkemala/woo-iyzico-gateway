@@ -27,14 +27,11 @@ define('WIC_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('WIC_VERSION', '1.4.0');
 
 /**
- * Çeviri dosyalarını yükler (varsa). Kaynak dil Türkçe olduğu için
- * çoğu kurulumda hiçbir .mo dosyasına ihtiyaç yok — ama biri gerçekten
- * başka bir dile çevirmek isterse (ör. languages/woo-iyzico-custom-en_US.mo)
- * standart WordPress i18n akışı burada devreye girer.
+ * Çeviriler WP 4.6'dan beri otomatik yükleniyor (Text Domain header'ı +
+ * /languages klasöründeki doğru isimlendirilmiş .mo dosyası yeterli),
+ * bu yüzden load_plugin_textdomain() çağrısına gerek yok — hem WP.org'da
+ * hem GitHub'dan kurulumda aynı şekilde çalışır.
  */
-add_action('plugins_loaded', function () {
-    load_plugin_textdomain('iyzico-payment-gateway', false, dirname(plugin_basename(WIC_PLUGIN_FILE)) . '/languages');
-});
 
 /**
  * Bail early with an admin notice if WooCommerce isn't active,
@@ -62,7 +59,8 @@ function wic_woocommerce_missing_notice() {
 add_action('init', 'wic_maybe_handle_callback');
 
 function wic_maybe_handle_callback() {
-    $path = isset($_SERVER['REQUEST_URI']) ? trim((string) parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') : '';
+    $request_uri = isset($_SERVER['REQUEST_URI']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+    $path = trim((string) wp_parse_url($request_uri, PHP_URL_PATH), '/');
 
     if ('api/payment/callback' !== $path) {
         return;

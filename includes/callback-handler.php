@@ -34,6 +34,7 @@ function wic_process_iyzico_callback() {
         wc_get_logger()->log($level, $message, array('source' => 'iyzico-custom'));
     };
 
+    // phpcs:ignore WordPress.Security.NonceVerification.Missing -- This is a payment callback: iyzico's own server POSTs here directly, there's no browser/WP session to attach a nonce to. Security comes from verifying this token server-to-server with our secret key below (RetrieveCheckoutFormRequest) — the raw POST value is never trusted on its own.
     $token = isset($_POST['token']) ? sanitize_text_field(wp_unslash($_POST['token'])) : '';
 
     if (empty($token)) {
@@ -56,9 +57,10 @@ function wic_process_iyzico_callback() {
         exit;
     }
 
+    // Order matching must happen via the token iyzico hands back (see note above — conversationId isn't reliable for this). This runs once per payment callback, not in a loop or on every page load, so the lack of a meta index isn't a practical concern here.
     $orders = wc_get_orders(array(
-        'meta_key'   => '_wic_iyzico_token',
-        'meta_value' => $token,
+        'meta_key'   => '_wic_iyzico_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+        'meta_value' => $token, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
         'limit'      => 1,
     ));
 
